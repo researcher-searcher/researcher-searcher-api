@@ -6,7 +6,7 @@ from loguru import logger
 from scripts.es_functions import vector_query, standard_query
 from scripts.general import load_spacy_model, neo4j_connect
 
-vector_index_name = "sentence_vectors"
+vector_index_name = "*sentence_vectors"
 pp = pprint.PrettyPrinter(indent=4)
 
 test_text1 = (
@@ -101,9 +101,11 @@ def q1(text):
                         logger.info(f'chunk {r}')
 
             # full text
+            logger.info(sent.text)
             es_sent(sent.text)
 
             # full text using noun string
+            logger.info(noun_chunk_string)
             es_sent(noun_chunk_string)
         else:
             logger.info('No noun chunk!')

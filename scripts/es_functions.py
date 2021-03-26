@@ -228,6 +228,10 @@ def vector_query(
                 "size": search_size,
                 "query": script_query,
                 "_source": {"includes": ["doc_id", "year", "sent_num", "sent_text"]},
+                "indices_boost": [
+                    { "title_sentence_vectors": 1.5 },
+                    { "abstract_sentence_vectors": 1 }
+                ]
             },
         )
         search_time = time.time() - search_start
