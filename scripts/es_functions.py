@@ -229,7 +229,7 @@ def vector_query(
                 "query": script_query,
                 "_source": {"includes": ["doc_id", "year", "sent_num", "sent_text"]},
                 "indices_boost": [
-                    { "title_sentence_vectors": 1.5 },
+                    { "title_sentence_vectors": 1.1 },
                     { "abstract_sentence_vectors": 1 }
                 ]
             },
@@ -239,7 +239,7 @@ def vector_query(
         logger.info(f"Search time: {search_time}")
         results = []
         for hit in response["hits"]["hits"]:
-            # logger.debug(hit)
+            #logger.debug(hit)
             # -1 to deal with +1 above
             # print("id: {}, score: {}".format(hit["_id"], hit["_score"] - 1))
             # print(hit["_source"])
@@ -248,6 +248,7 @@ def vector_query(
             if hit["_score"] - 1 > score_min:
                 results.append(
                     {
+                        "index": hit["_index"],
                         "url": hit["_source"]["doc_id"],
                         "year": hit["_source"]["year"],
                         "sent_num": hit["_source"]["sent_num"],
