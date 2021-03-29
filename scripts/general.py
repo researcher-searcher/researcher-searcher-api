@@ -40,3 +40,4 @@ def neo4j_connect():
     )
     session = driver.session()
     return session
+

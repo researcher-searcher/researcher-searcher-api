@@ -3,7 +3,12 @@ API for Researcher Searcher
 
 python -m spacy download en_core_web_lg
 
-### fastapi
+### local dev
 
-docker build -t rs-api .
+https://pypi.org/project/fastapi/
 
+uvicorn app.main:app --reload
+
+### build
+
+docker-compose build
