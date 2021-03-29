@@ -12,3 +12,7 @@ uvicorn app.main:app --reload
 ### build
 
 docker-compose build
+
+### todo
+
+Response model - https://fastapi.tiangolo.com/tutorial/response-model/
