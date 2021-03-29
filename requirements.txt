@@ -1,0 +1,15 @@
+black
+neo4j
+pandas
+environs
+loguru
+elasticsearch
+#scikit-learn
+scipy
+plotly
+pip
+setuptools
+wheel
+spacy
+scispacy
+pydantic==0.18.2
