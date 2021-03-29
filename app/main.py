@@ -13,3 +13,11 @@ def read_root():
 @app.get("/items/{item_id}")
 def read_item(item_id: int, q: Optional[str] = None):
     return {"item_id": item_id, "q": q}
+
+@app.get("/search/")
+async def run_query(query: str, method: Optional[str] = None):   
+    if method:
+        return {"query": query, "method": method}
+    else:
+        return {"query": query}
+    

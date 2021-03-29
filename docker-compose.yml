@@ -1,0 +1,14 @@
+version: '3'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    container_name: rs-api
+    ports:
+      - 8887:80
+    #environment:
+      #
+    volumes:
+      - ./:/app
