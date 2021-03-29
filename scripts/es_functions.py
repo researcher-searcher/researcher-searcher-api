@@ -5,11 +5,19 @@ from loguru import logger
 import numpy as np
 import time
 import pandas as pd
+from environs import Env
 
+env = Env()
+env.read_env()
+
+ES_HOST = env.str("ES_HOST")
+ES_PORT = env.str("ES_PORT")
+ES_USER = env.str("ES_USER")
+ES_PASSWORD = env.str("ES_PASSWORD")
 
 TIMEOUT = 300
 chunkSize = 10000
-es = Elasticsearch(["localhost:9200"], timeout=TIMEOUT)
+es = Elasticsearch([f'{ES_HOST}:{ES_PORT}'], http_auth=(ES_USER, ES_PASSWORD), timeout=TIMEOUT)
 
 
 def create_vector_index(index_name, dim_size):
