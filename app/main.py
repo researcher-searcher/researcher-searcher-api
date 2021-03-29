@@ -8,6 +8,7 @@ app = FastAPI()
 
 # functions
 vector_index_name = "*sentence_vectors"
+nlp = load_spacy_model()
 
 # standard match against sentence text
 def es_sent(text):    
