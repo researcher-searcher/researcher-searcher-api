@@ -3,34 +3,12 @@ from fastapi import FastAPI
 from loguru import logger
 from scripts.es_functions import vector_query, standard_query
 from scripts.general import load_spacy_model, neo4j_connect
+from scripts.search import es_sent
 
 app = FastAPI()
 
-# functions
-vector_index_name = "*sentence_vectors"
+# globals
 nlp = load_spacy_model()
-
-# standard match against sentence text
-def es_sent(text):    
-    body={
-        # "from":from_val,
-        "size": 5,
-        "query": {
-             "match": {
-                "sent_text": {
-                    "query": text     
-                }
-            }
-        },
-        "_source": ["doc_id","sent_num","sent_text"]
-    }
-    res = standard_query(index_name=vector_index_name,body=body)
-    results = []
-    if res:
-        for r in res['hits']['hits']:
-            if r["_score"] > 0.5:
-                results.append(r)
-    return results
 
 @app.get("/")
 def read_root():
