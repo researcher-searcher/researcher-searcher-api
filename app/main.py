@@ -33,4 +33,9 @@ async def run_query(query: str, method: Optional[str] = None):
         return {"query": query, "method": method, "res":res}
     else:
         return {"query": query, "res": 'NA'}
+
+#todo
+# sort results above using weighted mean or something similar.
+# add collaboration recommender (closest person with no shared output)
+# add output recommender (closest output to text)
     
