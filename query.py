@@ -84,6 +84,6 @@ def vec_query(text):
     logger.info(f'\n{df.head()}')
 
 if __name__ == "__main__":
-    qtext = test_text3
+    qtext = test_text5
     #person_query(qtext)
     vec_query(qtext)

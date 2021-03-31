@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import json
 from scripts.es_functions import vector_query, standard_query, mean_vector_query
 from scripts.general import neo4j_connect
@@ -59,8 +60,8 @@ def es_sent(text:str):
         },
         "_source": ["doc_id","sent_num","sent_text"],
             "indices_boost": [
-        { "title_sentence_vectors": 1.5 },
-        { "abstract_sentence_vectors": 1 }
+        { "title_sentence_vectors": 1 },
+        { "abstract_sentence_vectors": 0.75 }
     ]
     }
     res = standard_query(index_name=vector_index_name,body=body)
@@ -79,6 +80,14 @@ def es_sent(text:str):
         return op_counts.to_dict('records')
     else:
         return []
+
+def weighted_average(data):
+    #logger.info(data['person_name'])
+    weights = list(data['weight'])
+    scores = list(data['score'])
+    weighted_avg = round(np.average( scores, weights = weights),3)
+    logger.info(f'weights {weights} scores {scores} wa {weighted_avg}')
+    return weighted_avg
 
 def es_vec(nlp,text:str):
     doc = nlp(text)
@@ -105,8 +114,15 @@ def es_vec(nlp,text:str):
                 logger.info(f'\n{m.head()}')
                 #op_counts = json.loads(op[['person_name','person_id']].value_counts().nlargest(top_hits).to_json())
                 #logger.info(f'\n{op_counts}')
+                
                 m.to_csv('vec.tsv',sep='\t',index=False)
-                return m.to_dict('records')
+                m['weight']=range(m.shape[0],0,-1)
+                df_group = m.groupby(by=['person_id','person_name'])
+                wa=df_group.apply(weighted_average)
+                df = df_group.size().reset_index(name='count')
+                df['wa']=list(wa)
+                df.sort_values(by='wa',ascending=False,inplace=True)
+                return df.to_dict('records')
             else:
                 return []
 

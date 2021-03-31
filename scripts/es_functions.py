@@ -237,8 +237,8 @@ def vector_query(
                 "query": script_query,
                 "_source": {"includes": ["doc_id", "year", "sent_num", "sent_text"]},
                 "indices_boost": [
-                    { "title_sentence_vectors": 1.1 },
-                    { "abstract_sentence_vectors": 1 }
+                    { "title_sentence_vectors": 1 },
+                    { "abstract_sentence_vectors": 0.75 }
                 ]
             },
         )
