@@ -39,3 +39,6 @@ http://localhost:8000/search/?query=Tim%20has%20wide%20ranging%20interests%20in%
 
 Need to include option to return all supporting info, e.g. the sentences and scores that matched the query.
 
+How do results compare when searching via sentence vectors compared to using single doc?
+- can search against person vector directly or sentences-output-person
+- compareanalysing each sentence of query document to using whole thing 

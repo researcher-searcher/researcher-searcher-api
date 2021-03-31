@@ -76,7 +76,7 @@ def es_sent(text:str):
         op = output_to_people(list(set(output_list)))
         op_counts = json.loads(op[['person_name','person_id']].value_counts().nlargest(top_hits).to_json())
         logger.info(f'\n{op_counts}')
-        return op_counts
+        return op_counts.to_dict('records')
     else:
         return []
 
@@ -99,9 +99,13 @@ def es_vec(nlp,text:str):
                         output_list.append(r['url'])
             if len(output_list)>0:
                 op = output_to_people(list(set(output_list)))
-                op_counts = json.loads(op[['person_name','person_id']].value_counts().nlargest(top_hits).to_json())
-                logger.info(f'\n{op_counts}')
-                return op_counts
+                es_df = pd.DataFrame(results)
+                m = es_df.merge(op,left_on='url',right_on='output_id')
+                m.drop(['index','url'],axis=1,inplace=True)
+                logger.info(f'\n{m.head()}')
+                #op_counts = json.loads(op[['person_name','person_id']].value_counts().nlargest(top_hits).to_json())
+                #logger.info(f'\n{op_counts}')
+                return m.to_dict('records')
             else:
                 return []
 
