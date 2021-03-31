@@ -87,3 +87,59 @@ def es_vec(nlp,text:str):
             else:
                 return []
             
+def get_person(text:str,method:str='fuzzy'):
+    logger.info(f'get_person {text} {method}')
+    if method == 'fuzzy':
+        query = """
+            match 
+                (p:Person)
+            WHERE
+                toLower(p.name) contains toLower('{text}') 
+            RETURN 
+                p.name as person_name,p.url as person_id;
+        """.format(text=text)
+    else:
+        query = """
+            match 
+                (p:Person)
+            WHERE
+                p.name = '{text}' 
+            RETURN 
+                p.name as person_name,p.url as person_id;
+        """.format(text=text)
+        
+    logger.info(query)
+    data=session.run(query).data()
+    df = pd.json_normalize(data)
+    logger.info(f'\n{df}')
+    return df
+
+def get_colab(person:str):
+    logger.info(f'get_colab {person}')
+    query = """
+        MATCH 
+            (p1:Person)-[pp:PERSON_PERSON]-(p2) 
+        WHERE 
+            p1.url = '{person}'
+        WITH
+            p1,pp,p2 
+        ORDER 
+            by pp.score desc 
+        LIMIT
+            1000 
+        MATCH 
+            (p2) 
+        WHERE 
+            not (p1)-[:PERSON_OUTPUT]-(:Output)-[:PERSON_OUTPUT]-(p2) 
+        RETURN
+            p2.name as name,p2.url as url,pp.score as score 
+        ORDER
+            by score desc 
+        LIMIT
+            10
+    """.format(person=person)
+    logger.info(query)
+    data=session.run(query).data()
+    df = pd.json_normalize(data).to_dict('records')
+    logger.info(f'\n{df}')
+    return df
