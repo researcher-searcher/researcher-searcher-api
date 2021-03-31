@@ -105,6 +105,7 @@ def es_vec(nlp,text:str):
                 logger.info(f'\n{m.head()}')
                 #op_counts = json.loads(op[['person_name','person_id']].value_counts().nlargest(top_hits).to_json())
                 #logger.info(f'\n{op_counts}')
+                m.to_csv('vec.tsv',sep='\t',index=False)
                 return m.to_dict('records')
             else:
                 return []
