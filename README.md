@@ -26,3 +26,8 @@ curl -XGET 'http://localhost:8000/search/?method=vec&query=nematode'
 ```
 curl -XGET 'http://localhost:8000/search/?method=full&query=Blood%20Donation.%20Organ%20Donation%20and%20Transplantation.%20Therapeutics.%20Data%20Driven%20Transfusion%20Practice.%20Transfusion%20and%20Transplantation%20Transmitted%20Infections'
 ```
+
+### notes
+
+Need to include option to return all supporting info, e.g. the sentences and scores that matched the query.
+

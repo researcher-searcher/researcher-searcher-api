@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from loguru import logger
 from scripts.es_functions import vector_query, standard_query
 from scripts.general import load_spacy_model, neo4j_connect
-from scripts.search import es_sent, es_vec, get_person, get_colab
+from scripts.search import es_sent, es_vec, get_person, get_colab, es_person_vec
 
 app = FastAPI()
 
@@ -16,14 +16,19 @@ def read_root():
 
 @app.get("/search/")
 async def run_query(query: str, method: Optional[str] = None):   
+    # standard match against query sentences
     if method == 'full':
-        # standard match against sentence text
         res = es_sent(query)
         logger.info(res)
         return {"query": query, "method": method, "res":res}
+    # sentence vector match against query sentences
     elif method == 'vec':
-        # standard match against sentence text
         res = es_vec(nlp=nlp,text=query)
+        logger.info(res)
+        return {"query": query, "method": method, "res":res}
+    # people vector match against query
+    elif method == 'person':
+        res = es_person_vec(nlp=nlp,text=query)
         logger.info(res)
         return {"query": query, "method": method, "res":res}
     else:

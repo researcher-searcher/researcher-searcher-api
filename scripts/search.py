@@ -1,14 +1,32 @@
 import pandas as pd
 import json
-from scripts.es_functions import vector_query, standard_query
+from scripts.es_functions import vector_query, standard_query, mean_vector_query
 from scripts.general import neo4j_connect
 from loguru import logger
 
 vector_index_name = "*_sentence_vectors"
+person_index_name = "person_vectors"
+output_index_name = "output_vectors"
 
 session = neo4j_connect()
 
 top_hits = 100
+
+def person_info(id_list:list,node_property:str):
+    query = """
+        match 
+            (p:Person)
+        WHERE
+            p.{property} in {id_list} 
+        RETURN 
+            p.name as name, p.url as url, p.email as email;
+    """.format(property=node_property,id_list=id_list)
+    logger.info(query)
+    data=session.run(query).data()
+    df = pd.json_normalize(data)
+    logger.info(f'\n{df.head()}')
+    return df
+
 
 def output_to_people(output_list:list):
     query = """
@@ -86,6 +104,35 @@ def es_vec(nlp,text:str):
                 return op_counts
             else:
                 return []
+
+def es_person_vec(nlp,text:str):
+    doc = nlp(text)
+    logger.info(f'es_person_vec {text}')
+    # vectors
+    vec = doc.vector
+    res = mean_vector_query(index_name=person_index_name, query_vector=vec)
+    if res:
+        logger.info(res[0])
+        results = []
+        output_list = []
+        if res:
+            for r in res:
+                if r["score"] > 0.5:
+                    results.append(r)
+                    output_list.append(r['doc_id'])
+        if len(output_list)>0:
+            es_df = pd.DataFrame(results)
+            logger.info('here')
+            logger.info(es_df.head())
+            op = person_info(id_list=list(set(output_list)),node_property='email')
+            m = es_df.merge(op,left_on='doc_id',right_on='email')
+            m.drop(['index'],axis=1,inplace=True)
+            logger.info(f'\n{m}')
+            #op_counts = json.loads(op[['person_name','person_id']].value_counts().nlargest(top_hits).to_json())
+            #logger.info(f'\n{op_counts}')
+            return m.to_dict('records')
+        else:
+            return []
             
 def get_person(text:str,method:str='fuzzy'):
     logger.info(f'get_person {text} {method}')
