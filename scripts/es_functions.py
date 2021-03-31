@@ -269,7 +269,7 @@ def vector_query(
         return []
 
 def mean_vector_query(
-    index_name, query_vector, record_size=100000, search_size=10, score_min=0
+    index_name, query_vector, record_size=100000, search_size=100, score_min=0
 ):
     logger.debug(f"mean_vector_query {index_name}")
     script_query = {
