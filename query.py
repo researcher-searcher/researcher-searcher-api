@@ -65,6 +65,18 @@ test_text7 = (
     "substitution encoded in EXO1."
 )
 
+test_text8 = (
+    "Across the world, cannabis is increasingly available as a legal drug, and we can expect use amongst adolescents to increase. "
+    "Frequent cannabis use at this age increases the likelihood of health harms, including depression and anxiety in adulthood. "
+    "This project uses interview data collected at multiple times in participants’ lives, from childhood onwards, in order to "
+    "understand what causes frequent use of cannabis in adolescence, and what the relationship is between adolescent cannabis "
+    "use and adult mental health. This project explores the extent to which early life stress can be said to cause frequent "
+    "adolescent cannabis use, and how much this relationship is due to the early-adolescent behaviour and mental health of "
+    "frequent users. It then considers the relationship between frequent adolescent cannabis use and depression/anxiety, "
+    "exploring the extent to which an association between these is due to low employment, drug use and heavy alcohol use in "
+    "the years following early adolescence."
+)
+
 def person_query(text):
     logger.info(text)
     url = f'{api_url}/search/'
@@ -83,7 +95,19 @@ def vec_query(text):
     df = pd.json_normalize(res['res'])
     logger.info(f'\n{df.head()}')
 
+#http://localhost:8000/colab/?query=https://research-information.bris.ac.uk/en/persons/lindsey-a-hines
+def colab(text):
+    logger.info(text)
+    url = f'{api_url}/colab/'
+    params = {"query":text}
+    res = requests.get(url,params).json()
+    logger.info(res['res'])
+    df = pd.json_normalize(res['res'])
+    logger.info(f'\n{df.head()}')
+
+
 if __name__ == "__main__":
-    qtext = test_text5
+    qtext = test_text8
     #person_query(qtext)
-    vec_query(qtext)
+    #vec_query(qtext)
+    colab('https://research-information.bris.ac.uk/en/persons/benjamin-l-elsworth')
