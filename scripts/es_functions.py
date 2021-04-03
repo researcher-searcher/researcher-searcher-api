@@ -19,6 +19,8 @@ TIMEOUT = 300
 chunkSize = 10000
 es = Elasticsearch([f'{ES_HOST}:{ES_PORT}'], http_auth=(ES_USER, ES_PASSWORD), timeout=TIMEOUT)
 
+TITLE_WEIGHT=1
+ABSTRACT_WEIGHT=0.8
 
 def create_vector_index(index_name, dim_size):
     if es.indices.exists(index_name, request_timeout=TIMEOUT):
@@ -237,8 +239,8 @@ def vector_query(
                 "query": script_query,
                 "_source": {"includes": ["doc_id", "year", "sent_num", "sent_text"]},
                 "indices_boost": [
-                    { "title_sentence_vectors": 1 },
-                    { "abstract_sentence_vectors": 0.75 }
+                    { "title_sentence_vectors": TITLE_WEIGHT },
+                    { "abstract_sentence_vectors": ABSTRACT_WEIGHT }
                 ]
             },
         )
@@ -317,8 +319,23 @@ def mean_vector_query(
         return []
 
 def standard_query(
-    index_name, body
+    index_name, text
 ):
+    body={
+        "size": 1000,
+        "query": {
+             "match": {
+                "sent_text": {
+                    "query": text     
+                }
+            }
+        },
+        "_source": ["doc_id","sent_num","sent_text"],
+            "indices_boost": [
+        { "title_sentence_vectors": TITLE_WEIGHT },
+        { "abstract_sentence_vectors": ABSTRACT_WEIGHT }
+    ]
+    }
     res = es.search(
         ignore_unavailable=True,
         request_timeout=TIMEOUT,

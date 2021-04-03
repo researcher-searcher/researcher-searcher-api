@@ -91,7 +91,7 @@ def vec_query(text):
     url = f'{api_url}/search/'
     params = {"query":text,"method":"vec"}
     res = requests.get(url,params).json()
-    logger.info(res['res'])
+    logger.info(pp.pprint(res['res'][0]))
     df = pd.json_normalize(res['res'])
     logger.info(f'\n{df.head()}')
 
@@ -101,7 +101,7 @@ def colab(text):
     url = f'{api_url}/colab/'
     params = {"query":text}
     res = requests.get(url,params).json()
-    logger.info(res['res'])
+    logger.info(pp.pprint(res['res']))
     df = pd.json_normalize(res['res'])
     logger.info(f'\n{df.head()}')
 
@@ -109,5 +109,5 @@ def colab(text):
 if __name__ == "__main__":
     qtext = test_text8
     #person_query(qtext)
-    #vec_query(qtext)
-    colab('https://research-information.bris.ac.uk/en/persons/benjamin-l-elsworth')
+    vec_query(qtext)
+    #colab('https://research-information.bris.ac.uk/en/persons/benjamin-l-elsworth')
