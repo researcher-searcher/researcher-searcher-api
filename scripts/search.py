@@ -44,26 +44,33 @@ def output_to_people(output_list:list):
     logger.info(f'\n{df}')
     return df
 
-
-# standard match against sentence text
-def es_sent(text:str):    
-    logger.info(f'Running es_sent with {text}')
-    res = standard_query(index_name=vector_index_name,text=text)
-    logger.info(res)
-    results = []
-    output_list = []
-    if res:
-        for r in res['hits']['hits']:
-            if r["_score"] > 0.5:
-                results.append(r['_source'])
-                output_list.append(r['_source']['doc_id'])
-    if len(output_list)>0:
-        op = output_to_people(list(set(output_list)))
-        op_counts = json.loads(op[['person_name','person_id']].value_counts().nlargest(top_hits).to_json())
-        logger.info(f'\n{op_counts}')
-        return op_counts.to_dict('records')
-    else:
-        return []
+def convert_df_to_wa(results_df,person_df,doc_col):
+    m = results_df.merge(person_df,left_on=doc_col,right_on='output_id')
+    m.drop([doc_col],axis=1,inplace=True)
+    logger.info(f'\n{m.head()}')
+    
+    m['weight']=range(m.shape[0],0,-1)
+    df_group = m.groupby(by=['person_id','person_name'])
+    wa=df_group.apply(weighted_average)
+    df = df_group.size().reset_index(name='count')
+    logger.info(df.columns)
+    # add weighted average
+    df['wa']=list(wa)
+    # create lists of sentences and output ids to provide source of matches
+    scores = list(df_group['score'].apply(list))
+    sent_num = list(df_group['sent_num'].apply(list))
+    q_sent_num = list(df_group['q_sent_num'].apply(list))
+    sent_text = list(df_group['sent_text'].apply(list))
+    q_sent_text = list(df_group['q_sent_text'].apply(list))
+    output_list = list(df_group['output_id'].apply(list))
+    df['scores']=scores
+    df['m_sent_num']=sent_num
+    df['q_sent_num']=q_sent_num
+    df['m_sent_text']=sent_text
+    df['q_sent_text']=q_sent_text
+    df['output']=output_list
+    df.sort_values(by='wa',ascending=False,inplace=True)
+    return df
 
 def weighted_average(data):
     #logger.info(data['person_name'])
@@ -73,7 +80,33 @@ def weighted_average(data):
     logger.info(f'weights {weights} scores {scores} wa {weighted_avg}')
     return weighted_avg
 
-
+# standard match against sentence text
+def es_sent(nlp,text:str):    
+    logger.info(f'Running es_sent with {text}')
+    doc = nlp(text)
+    q_sent_num=0
+    results = []
+    output_list = []
+    for sent in doc.sents:
+        logger.info(f'##### {q_sent_num} {sent.text} ######')
+        res = standard_query(index_name=vector_index_name,text=sent.text)
+        logger.info(res)
+        if res:
+            for r in res['hits']['hits']:
+                if r["_score"] > 0.5:
+                    rr = r['_source']
+                    rr['score']=r["_score"]
+                    rr['q_sent_num']=q_sent_num
+                    rr['q_sent_text']=sent.text
+                    results.append(rr)
+                    output_list.append(r['_source']['doc_id'])
+    if len(output_list)>0:
+        op = output_to_people(list(set(output_list)))
+        es_df = pd.DataFrame(results)
+        df = convert_df_to_wa(es_df,op,'doc_id')
+        return df.to_dict('records')
+    else:
+        return []
 
 def es_vec(nlp,text:str):
     doc = nlp(text)
@@ -99,33 +132,7 @@ def es_vec(nlp,text:str):
     if len(output_list)>0:
         op = output_to_people(list(set(output_list)))
         es_df = pd.DataFrame(results)
-        m = es_df.merge(op,left_on='url',right_on='output_id')
-        m.drop(['index','url'],axis=1,inplace=True)
-        logger.info(f'\n{m.head()}')
-        #op_counts = json.loads(op[['person_name','person_id']].value_counts().nlargest(top_hits).to_json())
-        #logger.info(f'\n{op_counts}')
-        
-        m.to_csv('vec.tsv',sep='\t',index=False)
-        m['weight']=range(m.shape[0],0,-1)
-        df_group = m.groupby(by=['person_id','person_name'])
-        wa=df_group.apply(weighted_average)
-        df = df_group.size().reset_index(name='count')
-        # add weighted average
-        df['wa']=list(wa)
-        # create lists of sentences and output ids to provide source of matches
-        scores = list(df_group['score'].apply(list))
-        sent_num = list(df_group['sent_num'].apply(list))
-        q_sent_num = list(df_group['q_sent_num'].apply(list))
-        sent_text = list(df_group['sent_text'].apply(list))
-        q_sent_text = list(df_group['q_sent_text'].apply(list))
-        output_list = list(df_group['output_id'].apply(list))
-        df['scores']=scores
-        df['m_sent_num']=sent_num
-        df['q_sent_num']=q_sent_num
-        df['m_sent_text']=sent_text
-        df['q_sent_text']=q_sent_text
-        df['output']=output_list
-        df.sort_values(by='wa',ascending=False,inplace=True)
+        df = convert_df_to_wa(es_df,op,'url')
         return df.to_dict('records')
     else:
         return []

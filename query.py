@@ -21,8 +21,8 @@ test_text2 = (
     "between one and five years. This funding opportunity runs three times every year."
 )
 test_text3 = (
-    "We have implemented efficient search methods and an application programming interface, to create fast and convenient"
-    " functions to utilize triples extracted from the biomedical literature by SemMedDB."
+    "We have implemented efficient search methods and an application programming interface, to create fast and convenient "
+    "functions to utilize triples extracted from the biomedical literature by SemMedDB."
 )
 test_text4 = (
     "Ankyrin-R provides a key link between band 3 and the spectrin cytoskeleton that helps to maintain the highly "
@@ -46,7 +46,7 @@ test_text5 = (
     "Risk factors for breast cancer"
 )
 
-test_text6 = "neuroscience"
+test_text6 = "triples extracted from the biomedical literature by SemMedDB"
 
 #https://pubmed.ncbi.nlm.nih.gov/25751625/
 # compare this to the copy/paste text - find expertise results
@@ -91,7 +91,16 @@ def vec_query(text):
     url = f'{api_url}/search/'
     params = {"query":text,"method":"vec"}
     res = requests.get(url,params).json()
-    logger.info(pp.pprint(res['res'][0]))
+    logger.info(pp.pprint(res['res'][0:5]))
+    df = pd.json_normalize(res['res'])
+    logger.info(f'\n{df.head()}')
+
+def full_text_query(text):
+    logger.info(text)
+    url = f'{api_url}/search/'
+    params = {"query":text,"method":"full"}
+    res = requests.get(url,params).json()
+    logger.info(pp.pprint(res['res'][0:5]))
     df = pd.json_normalize(res['res'])
     logger.info(f'\n{df.head()}')
 
@@ -107,7 +116,8 @@ def colab(text):
 
 
 if __name__ == "__main__":
-    qtext = test_text8
+    qtext = test_text2
     #person_query(qtext)
-    vec_query(qtext)
+    #vec_query(qtext)
+    full_text_query(qtext)
     #colab('https://research-information.bris.ac.uk/en/persons/benjamin-l-elsworth')

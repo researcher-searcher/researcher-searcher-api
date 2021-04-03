@@ -42,3 +42,4 @@ Need to include option to return all supporting info, e.g. the sentences and sco
 How do results compare when searching via sentence vectors compared to using single doc?
 - can search against person vector directly or sentences-output-person
 - compareanalysing each sentence of query document to using whole thing 
+- why doesn't a search using exact text in index return the matching people first, e.g. test_text3 from MPresto

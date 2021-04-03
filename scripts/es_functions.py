@@ -20,7 +20,7 @@ chunkSize = 10000
 es = Elasticsearch([f'{ES_HOST}:{ES_PORT}'], http_auth=(ES_USER, ES_PASSWORD), timeout=TIMEOUT)
 
 TITLE_WEIGHT=1
-ABSTRACT_WEIGHT=0.8
+ABSTRACT_WEIGHT=1
 
 def create_vector_index(index_name, dim_size):
     if es.indices.exists(index_name, request_timeout=TIMEOUT):

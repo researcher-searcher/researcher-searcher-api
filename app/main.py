@@ -18,7 +18,7 @@ def read_root():
 async def run_query(query: str, method: Optional[str] = None):   
     # standard match against query sentences
     if method == 'full':
-        res = es_sent(query)
+        res = es_sent(nlp=nlp,text=query)
         logger.info(res)
         return {"query": query, "method": method, "res":res}
     # sentence vector match against query sentences
