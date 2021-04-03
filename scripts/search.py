@@ -38,22 +38,19 @@ def output_to_people(output_list:list):
         RETURN 
             p.name as person_name,p.url as person_id, o.id as output_id;
     """.format(output_list=output_list)
-    logger.info(query)
+    #logger.info(query)
     data=session.run(query).data()
     df = pd.json_normalize(data)
-    logger.info(f'\n{df}')
+    #logger.info(f'\n{df}')
     return df
 
 def convert_df_to_wa(results_df,person_df,doc_col):
     m = results_df.merge(person_df,left_on=doc_col,right_on='output_id')
     m.drop([doc_col],axis=1,inplace=True)
-    logger.info(f'\n{m.head()}')
-    
     m['weight']=range(m.shape[0],0,-1)
     df_group = m.groupby(by=['person_id','person_name'])
     wa=df_group.apply(weighted_average)
     df = df_group.size().reset_index(name='count')
-    logger.info(df.columns)
     # add weighted average
     df['wa']=list(wa)
     # create lists of sentences and output ids to provide source of matches
@@ -77,7 +74,7 @@ def weighted_average(data):
     weights = list(data['weight'])
     scores = list(data['score'])
     weighted_avg = round(np.average( scores, weights = weights),3)
-    logger.info(f'weights {weights} scores {scores} wa {weighted_avg}')
+    #logger.info(f'weights {weights} scores {scores} wa {weighted_avg}')
     return weighted_avg
 
 # standard match against sentence text
@@ -90,7 +87,7 @@ def es_sent(nlp,text:str):
     for sent in doc.sents:
         logger.info(f'##### {q_sent_num} {sent.text} ######')
         res = standard_query(index_name=vector_index_name,text=sent.text)
-        logger.info(res)
+        #logger.info(res)
         if res:
             for r in res['hits']['hits']:
                 if r["_score"] > 0.5:
@@ -100,6 +97,7 @@ def es_sent(nlp,text:str):
                     rr['q_sent_text']=sent.text
                     results.append(rr)
                     output_list.append(r['_source']['doc_id'])
+        q_sent_num+=1
     if len(output_list)>0:
         op = output_to_people(list(set(output_list)))
         es_df = pd.DataFrame(results)
@@ -189,10 +187,10 @@ def get_person(text:str,method:str='fuzzy'):
                 p.name as person_name,p.url as person_id;
         """.format(text=text)
         
-    logger.info(query)
+    #logger.info(query)
     data=session.run(query).data()
     df = pd.json_normalize(data)
-    logger.info(f'\n{df}')
+    #logger.info(f'\n{df}')
     return df
 
 def get_colab(person:str):

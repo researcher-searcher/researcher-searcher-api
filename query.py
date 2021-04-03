@@ -116,7 +116,7 @@ def colab(text):
 
 
 if __name__ == "__main__":
-    qtext = test_text2
+    qtext = test_text8
     #person_query(qtext)
     #vec_query(qtext)
     full_text_query(qtext)
