@@ -82,8 +82,25 @@ test_text9 = (
 )
 
 test_text10 = (
-    'mendelian randomization and bmi'
+    'gwas genome wide association study'
 )
+
+data_sci_capabilities = [
+    'Human presence and detection and recognition',
+    'Machine learning',
+    'Natural language processing',
+    'Machine perception - machine/computer vision',
+    'Machine perceptoion - facial recognition',
+    'Automation and robotics',
+    'Social intelligence',
+    'AI (General intelligence)',
+    'Image anomaly detection and classification',
+    'Text to speech / speech to text',
+    'AI for manufacturing process control',
+    'Data mining / advanced analytics / trend analysis',
+    'Social justice / criminal justice / data ethics/AI',
+    'Equipment / Facility Monitoring'
+]
 
 def person_query(text):
     logger.info(text)
@@ -101,7 +118,8 @@ def vec_query(text):
     res = requests.get(url,params).json()
     logger.info(pp.pprint(res['res'][0:5]))
     df = pd.json_normalize(res['res'])
-    logger.info(f"\n{df[['person_name','scores','weights','wa','count']].head(n=20)}")
+    if not df.empty:
+        logger.info(f"\n{df[['person_name','scores','weights','wa','count']].head(n=20)}")
     #logger.info(f'\n{df.columns}')
 
 def full_text_query(text):
@@ -111,7 +129,8 @@ def full_text_query(text):
     res = requests.get(url,params).json()
     logger.info(pp.pprint(res['res'][0:5]))
     df = pd.json_normalize(res['res'])
-    logger.info(f"\n{df[['person_name','scores','weights','wa','count']].head(n=20)}")
+    if not df.empty:
+        logger.info(f"\n{df[['person_name','scores','weights','wa','count']].head(n=20)}")
     #logger.info(f'\n{df.columns}')
 
 
@@ -127,8 +146,9 @@ def colab(text):
 
 
 if __name__ == "__main__":
-    qtext = test_text5
+    #qtext = test_text10
     #person_query(qtext)
-    vec_query(qtext)
-    full_text_query(qtext)
+    for qtext in data_sci_capabilities[2:3]:
+        vec_query(qtext)
+        full_text_query(qtext)
     #colab('https://research-information.bris.ac.uk/en/persons/benjamin-l-elsworth')
