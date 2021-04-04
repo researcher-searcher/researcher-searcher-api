@@ -77,6 +77,14 @@ test_text8 = (
     "the years following early adolescence."
 )
 
+test_text9 = (
+    "reinforcement learning"
+)
+
+test_text10 = (
+    'graph database. gwas ukbiobank. cancer'
+)
+
 def person_query(text):
     logger.info(text)
     url = f'{api_url}/search/'
@@ -93,7 +101,8 @@ def vec_query(text):
     res = requests.get(url,params).json()
     logger.info(pp.pprint(res['res'][0:5]))
     df = pd.json_normalize(res['res'])
-    logger.info(f'\n{df.head()}')
+    logger.info(f"\n{df[['person_name','scores','weights','wa','count']].head(n=20)}")
+    #logger.info(f'\n{df.columns}')
 
 def full_text_query(text):
     logger.info(text)
@@ -102,7 +111,9 @@ def full_text_query(text):
     res = requests.get(url,params).json()
     logger.info(pp.pprint(res['res'][0:5]))
     df = pd.json_normalize(res['res'])
-    logger.info(f'\n{df.head()}')
+    logger.info(f"\n{df[['person_name','scores','weights','wa','count']].head(n=20)}")
+    #logger.info(f'\n{df.columns}')
+
 
 #http://localhost:8000/colab/?query=https://research-information.bris.ac.uk/en/persons/lindsey-a-hines
 def colab(text):
@@ -116,8 +127,8 @@ def colab(text):
 
 
 if __name__ == "__main__":
-    qtext = test_text8
+    qtext = test_text10
     #person_query(qtext)
-    #vec_query(qtext)
+    vec_query(qtext)
     full_text_query(qtext)
     #colab('https://research-information.bris.ac.uk/en/persons/benjamin-l-elsworth')

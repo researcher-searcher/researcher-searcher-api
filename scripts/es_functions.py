@@ -20,7 +20,7 @@ chunkSize = 10000
 es = Elasticsearch([f'{ES_HOST}:{ES_PORT}'], http_auth=(ES_USER, ES_PASSWORD), timeout=TIMEOUT)
 
 TITLE_WEIGHT=1
-ABSTRACT_WEIGHT=1
+ABSTRACT_WEIGHT=0.9
 
 def create_vector_index(index_name, dim_size):
     if es.indices.exists(index_name, request_timeout=TIMEOUT):
@@ -266,6 +266,7 @@ def vector_query(
                         "score": hit["_score"] - 1,
                     }
                 )
+        logger.debug(len(results))
         return results
     except:
         return []
@@ -322,7 +323,7 @@ def standard_query(
     index_name, text
 ):
     body={
-        "size": 1000,
+        "size": 100,
         "query": {
              "match": {
                 "sent_text": {

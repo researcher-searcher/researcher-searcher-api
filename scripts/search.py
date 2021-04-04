@@ -30,6 +30,7 @@ def person_info(id_list:list,node_property:str):
 
 
 def output_to_people(output_list:list):
+    logger.info(f'output_to_people {len(output_list)}')
     query = """
         match 
             (p:Person)-[:PERSON_OUTPUT]-(o:Output) 
@@ -45,27 +46,32 @@ def output_to_people(output_list:list):
     return df
 
 def convert_df_to_wa(results_df,person_df,doc_col):
+    logger.info(results_df.shape)
     m = results_df.merge(person_df,left_on=doc_col,right_on='output_id')
     m.drop([doc_col],axis=1,inplace=True)
-    m['weight']=range(m.shape[0],0,-1)
+    #m['weight']=range(m.shape[0],0,-1)
     df_group = m.groupby(by=['person_id','person_name'])
     wa=df_group.apply(weighted_average)
     df = df_group.size().reset_index(name='count')
     # add weighted average
     df['wa']=list(wa)
     # create lists of sentences and output ids to provide source of matches
+    weights = list(df_group['weight'].apply(list))
     scores = list(df_group['score'].apply(list))
     sent_num = list(df_group['sent_num'].apply(list))
     q_sent_num = list(df_group['q_sent_num'].apply(list))
     sent_text = list(df_group['sent_text'].apply(list))
     q_sent_text = list(df_group['q_sent_text'].apply(list))
     output_list = list(df_group['output_id'].apply(list))
+    index_list = list(df_group['index'].apply(list))
+    df['weights']=weights
     df['scores']=scores
     df['m_sent_num']=sent_num
     df['q_sent_num']=q_sent_num
     df['m_sent_text']=sent_text
     df['q_sent_text']=q_sent_text
     df['output']=output_list
+    df['index']=index_list
     df.sort_values(by='wa',ascending=False,inplace=True)
     return df
 
@@ -74,6 +80,7 @@ def weighted_average(data):
     weights = list(data['weight'])
     scores = list(data['score'])
     weighted_avg = round(np.average( scores, weights = weights),3)
+    #weighted_avg = round(np.average( scores),3)
     #logger.info(f'weights {weights} scores {scores} wa {weighted_avg}')
     return weighted_avg
 
@@ -89,14 +96,19 @@ def es_sent(nlp,text:str):
         res = standard_query(index_name=vector_index_name,text=sent.text)
         #logger.info(res)
         if res:
+            weight = int(res["hits"]["total"]["value"])
+            logger.info(weight)
             for r in res['hits']['hits']:
                 if r["_score"] > 0.5:
                     rr = r['_source']
+                    rr['index']=r['_index']
                     rr['score']=r["_score"]
                     rr['q_sent_num']=q_sent_num
                     rr['q_sent_text']=sent.text
+                    rr['weight']=weight
                     results.append(rr)
                     output_list.append(r['_source']['doc_id'])
+                    weight-=1
         q_sent_num+=1
     if len(output_list)>0:
         op = output_to_people(list(set(output_list)))
@@ -113,20 +125,22 @@ def es_vec(nlp,text:str):
     output_list = []
     for sent in doc.sents:
         logger.info(f'##### {q_sent_num} {sent} ######')
-
         # vectors
         sent_vec = sent.vector
         res = vector_query(index_name=vector_index_name, query_vector=sent_vec)
         if res:
             logger.info(res[0])
-            if res:
-                for r in res:
-                    if r["score"] > 0.5:
-                        r['q_sent_num']=q_sent_num
-                        r['q_sent_text']=sent.text
-                        results.append(r)
-                        output_list.append(r['url'])
-        q_sent_num+=1
+            weight = len(res)
+            logger.info(weight)
+            for r in res:
+                if r["score"] > 0.5:
+                    r['q_sent_num']=q_sent_num
+                    r['q_sent_text']=sent.text
+                    r['weight']=weight
+                    results.append(r)
+                    output_list.append(r['url'])
+                    weight-=1
+    q_sent_num+=1
     if len(output_list)>0:
         op = output_to_people(list(set(output_list)))
         es_df = pd.DataFrame(results)
@@ -157,7 +171,7 @@ def es_person_vec(nlp,text:str):
             logger.info(es_df.head())
             op = person_info(id_list=list(set(output_list)),node_property='email')
             m = es_df.merge(op,left_on='doc_id',right_on='email')
-            m.drop(['index','doc_id'],axis=1,inplace=True)
+            m.drop(['doc_id'],axis=1,inplace=True)
             m.sort_values(by='score',ascending=False,inplace=True)
             logger.info(f'\n{m}')
             #op_counts = json.loads(op[['person_name','person_id']].value_counts().nlargest(top_hits).to_json())
