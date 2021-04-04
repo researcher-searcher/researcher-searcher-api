@@ -28,6 +28,21 @@ def person_info(id_list:list,node_property:str):
     logger.info(f'\n{df.head()}')
     return df
 
+def output_info(id_list:list,node_property:str):
+    query = """
+        match 
+            (o:Output)
+        WHERE
+            o.{property} in {id_list} 
+        RETURN 
+            o.id as id, o.title as title, o.year as year;
+    """.format(property=node_property,id_list=id_list)
+    logger.info(query)
+    data=session.run(query).data()
+    df = pd.json_normalize(data)
+    logger.info(f'\n{df.head()}')
+    return df
+
 
 def output_to_people(output_list:list):
     logger.info(f'output_to_people {len(output_list)}')
@@ -79,8 +94,8 @@ def weighted_average(data):
     #logger.info(data['person_name'])
     weights = list(data['weight'])
     scores = list(data['score'])
-    weighted_avg = round(np.average( scores, weights = weights),3)
-    #weighted_avg = round(np.average( scores),3)
+    #weighted_avg = round(np.average( scores, weights = weights),3)
+    weighted_avg = round(np.average( scores),3)
     #logger.info(f'weights {weights} scores {scores} wa {weighted_avg}')
     return weighted_avg
 
@@ -171,6 +186,36 @@ def es_person_vec(nlp,text:str):
             logger.info(es_df.head())
             op = person_info(id_list=list(set(output_list)),node_property='email')
             m = es_df.merge(op,left_on='doc_id',right_on='email')
+            m.drop(['doc_id'],axis=1,inplace=True)
+            m.sort_values(by='score',ascending=False,inplace=True)
+            logger.info(f'\n{m}')
+            #op_counts = json.loads(op[['person_name','person_id']].value_counts().nlargest(top_hits).to_json())
+            #logger.info(f'\n{op_counts}')
+            return m.to_dict('records')
+        else:
+            return []
+
+def es_output_vec(nlp,text:str):
+    doc = nlp(text)
+    logger.info(f'es_output_vec {text}')
+    # vectors
+    vec = doc.vector
+    res = mean_vector_query(index_name=output_index_name, query_vector=vec)
+    if res:
+        logger.info(res[0])
+        results = []
+        output_list = []
+        if res:
+            for r in res:
+                if r["score"] > 0.5:
+                    results.append(r)
+                    output_list.append(r['doc_id'])
+        if len(output_list)>0:
+            es_df = pd.DataFrame(results)
+            logger.info('here')
+            logger.info(es_df.head())
+            op = output_info(id_list=list(set(output_list)),node_property='id')
+            m = es_df.merge(op,left_on='doc_id',right_on='id')
             m.drop(['doc_id'],axis=1,inplace=True)
             m.sort_values(by='score',ascending=False,inplace=True)
             logger.info(f'\n{m}')

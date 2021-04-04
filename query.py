@@ -109,7 +109,16 @@ def person_query(text):
     res = requests.get(url,params).json()
     #logger.info(res['res'])
     df = pd.json_normalize(res['res'])
-    logger.info(f'\n{df.head()}')
+    logger.info(f'\n{df.head(n=20)}')
+
+def output_query(text):
+    logger.info(text)
+    url = f'{api_url}/search/'
+    params = {"query":text,"method":"output"}
+    res = requests.get(url,params).json()
+    #logger.info(res['res'])
+    df = pd.json_normalize(res['res'])
+    logger.info(f'\n{df.head(n=20)}')
 
 def vec_query(text):
     logger.info(text)
@@ -144,11 +153,16 @@ def colab(text):
     df = pd.json_normalize(res['res'])
     logger.info(f'\n{df.head()}')
 
+def q1():
+    qtext = 'natural language processing'
+    person_query(qtext)
+    vec_query(qtext)
+    full_text_query(qtext)
 
 if __name__ == "__main__":
-    #qtext = test_text10
-    #person_query(qtext)
-    for qtext in data_sci_capabilities[2:3]:
-        vec_query(qtext)
-        full_text_query(qtext)
+    #q1()
+    output_query('natural language processing')
+    #for qtext in data_sci_capabilities[2:3]:
+    #    vec_query(qtext)
+    #    full_text_query(qtext)
     #colab('https://research-information.bris.ac.uk/en/persons/benjamin-l-elsworth')

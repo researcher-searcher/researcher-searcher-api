@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from loguru import logger
 from scripts.es_functions import vector_query, standard_query
 from scripts.general import load_spacy_model, neo4j_connect
-from scripts.search import es_sent, es_vec, get_person, get_colab, es_person_vec
+from scripts.search import es_sent, es_vec, get_person, get_colab, es_person_vec, es_output_vec
 
 app = FastAPI()
 
@@ -30,6 +30,10 @@ async def run_query(query: str, method: Optional[str] = None):
     elif method == 'person':
         res = es_person_vec(nlp=nlp,text=query)
         #logger.info(res)
+        return {"query": query, "method": method, "res":res}
+    elif method == 'output':
+        res = es_output_vec(nlp=nlp,text=query)
+        logger.info(res)
         return {"query": query, "method": method, "res":res}
     else:
         return {"query": query, "res": 'NA'}
