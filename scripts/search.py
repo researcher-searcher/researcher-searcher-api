@@ -97,7 +97,6 @@ def es_sent(nlp,text:str):
         #logger.info(res)
         if res:
             weight = int(res["hits"]["total"]["value"])
-            logger.info(weight)
             for r in res['hits']['hits']:
                 if r["_score"] > 0.5:
                     rr = r['_source']
@@ -111,6 +110,7 @@ def es_sent(nlp,text:str):
                     weight-=1
         q_sent_num+=1
     if len(output_list)>0:
+        logger.info(len(output_list))
         op = output_to_people(list(set(output_list)))
         es_df = pd.DataFrame(results)
         df = convert_df_to_wa(es_df,op,'doc_id')
@@ -140,7 +140,7 @@ def es_vec(nlp,text:str):
                     results.append(r)
                     output_list.append(r['url'])
                     weight-=1
-    q_sent_num+=1
+        q_sent_num+=1
     if len(output_list)>0:
         op = output_to_people(list(set(output_list)))
         es_df = pd.DataFrame(results)

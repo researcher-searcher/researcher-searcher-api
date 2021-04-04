@@ -82,7 +82,7 @@ test_text9 = (
 )
 
 test_text10 = (
-    'graph database. gwas ukbiobank. cancer'
+    'mendelian randomization and bmi'
 )
 
 def person_query(text):
@@ -127,7 +127,7 @@ def colab(text):
 
 
 if __name__ == "__main__":
-    qtext = test_text10
+    qtext = test_text5
     #person_query(qtext)
     vec_query(qtext)
     full_text_query(qtext)

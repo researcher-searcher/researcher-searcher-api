@@ -225,7 +225,7 @@ def vector_query(
             "query": {"match_all": {}},
             "script": {
                 # +1 to deal with negative results (script score function must not produce negative scores)
-                "source": "cosineSimilarity(params.query_vector, doc['sent_vector']) +1",
+                "source": "cosineSimilarity(params.query_vector, 'sent_vector') +1",
                 "params": {"query_vector": query_vector},
             },
         }
@@ -332,10 +332,10 @@ def standard_query(
             }
         },
         "_source": ["doc_id","sent_num","sent_text"],
-            "indices_boost": [
-        { "title_sentence_vectors": TITLE_WEIGHT },
-        { "abstract_sentence_vectors": ABSTRACT_WEIGHT }
-    ]
+        "indices_boost": [
+            { "title_sentence_vectors": TITLE_WEIGHT },
+            { "abstract_sentence_vectors": ABSTRACT_WEIGHT }
+        ]
     }
     res = es.search(
         ignore_unavailable=True,
