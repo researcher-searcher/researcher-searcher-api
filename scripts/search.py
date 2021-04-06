@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 import json
-from scripts.es_functions import vector_query, standard_query, mean_vector_query
+import collections
+from scripts.es_functions import vector_query, standard_query, mean_vector_query, filter_query
 from scripts.general import neo4j_connect
 from loguru import logger
 
@@ -205,11 +206,10 @@ def es_output_vec(nlp,text:str):
         logger.info(res[0])
         results = []
         output_list = []
-        if res:
-            for r in res:
-                if r["score"] > 0.5:
-                    results.append(r)
-                    output_list.append(r['doc_id'])
+        for r in res:
+            if r["score"] > 0.5:
+                results.append(r)
+                output_list.append(r['doc_id'])
         if len(output_list)>0:
             es_df = pd.DataFrame(results)
             logger.info('here')
@@ -281,3 +281,34 @@ def get_colab(person:str):
     df = pd.json_normalize(data).to_dict('records')
     logger.info(f'\n{df}')
     return df
+
+def get_person(person:str):
+    logger.info(f'get_person {person}')
+    query = """
+        match 
+            (p:Person)-[:PERSON_OUTPUT]-(o:Output) 
+        WHERE
+            p._id = '{person}' 
+        RETURN 
+            p.name as person_name,p.url as person_id, o.id as output_id;
+    """.format(person=person)
+    logger.info(query)
+    data=session.run(query).data()
+    df = pd.json_normalize(data)
+    logger.info(df)
+
+    # get the noun chunks from elastic
+    filterData = {
+        "terms": {'doc_id': list(df['output_id'])}
+    }
+    res = filter_query(index_name = '*sentence_nouns',filterData=filterData)
+    if res:
+        results = []
+        logger.info(res["hits"]["total"]["value"])
+        for r in res['hits']['hits']:
+            rr = r['_source']
+            results.append(rr['noun_phrase'].lower())
+        ctr = collections.Counter(results).most_common(20)
+        return ctr
+    else:
+        return []

@@ -161,7 +161,14 @@ def q1():
 
 if __name__ == "__main__":
     #q1()
-    output_query('natural language processing')
+    text = (
+        "I have a background in evolutionary biology, bioinformatics, data science, cancer informatics, NLP "
+    "and software engineering.  I'm now focusing on predicting causal mechanisms using multivariate data and graphs."
+    )
+    output_query(text)
+    person_query(text)
+    vec_query(text)
+    full_text_query(text)
     #for qtext in data_sci_capabilities[2:3]:
     #    vec_query(qtext)
     #    full_text_query(qtext)

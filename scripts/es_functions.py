@@ -344,3 +344,22 @@ def standard_query(
         body=body
     )
     return res
+
+def filter_query(index_name,filterData):
+    body={
+            # "from":from_val,
+            "size": 10000,
+            "query": {
+                "bool": {
+                    "filter": filterData
+                }
+            }
+        }
+
+    res = es.search(
+        ignore_unavailable=True,
+        request_timeout=TIMEOUT,
+        index=index_name,
+        body=body
+    )
+    return res
