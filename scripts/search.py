@@ -61,6 +61,16 @@ def output_to_people(output_list:list):
     #logger.info(f'\n{df}')
     return df
 
+# if no restriction on top number, people who have lots of hits get penalised for those hits with lower scores
+def weighted_average(data,top=5):
+    #logger.info(data['person_name'])
+    weights = list(data['weight'][:top])
+    scores = list(data['score'][:top])
+    weighted_avg = round(np.average( scores, weights = weights),3)
+    #weighted_avg = round(np.average( scores),3)
+    #logger.info(f'weights {weights} scores {scores} wa {weighted_avg}')
+    return weighted_avg
+
 def convert_df_to_wa(results_df,person_df,doc_col):
     logger.info(results_df.shape)
     m = results_df.merge(person_df,left_on=doc_col,right_on='output_id')
@@ -91,15 +101,6 @@ def convert_df_to_wa(results_df,person_df,doc_col):
     df.sort_values(by='wa',ascending=False,inplace=True)
     return df
 
-def weighted_average(data):
-    #logger.info(data['person_name'])
-    weights = list(data['weight'])
-    scores = list(data['score'])
-    #weighted_avg = round(np.average( scores, weights = weights),3)
-    weighted_avg = round(np.average( scores),3)
-    #logger.info(f'weights {weights} scores {scores} wa {weighted_avg}')
-    return weighted_avg
-
 # standard match against sentence text
 def es_sent(nlp,text:str):    
     logger.info(f'Running es_sent with {text}')
@@ -114,16 +115,15 @@ def es_sent(nlp,text:str):
         if res:
             weight = int(res["hits"]["total"]["value"])
             for r in res['hits']['hits']:
-                if r["_score"] > 0.5:
-                    rr = r['_source']
-                    rr['index']=r['_index']
-                    rr['score']=r["_score"]
-                    rr['q_sent_num']=q_sent_num
-                    rr['q_sent_text']=sent.text
-                    rr['weight']=weight
-                    results.append(rr)
-                    output_list.append(r['_source']['doc_id'])
-                    weight-=1
+                rr = r['_source']
+                rr['index']=r['_index']
+                rr['score']=r["_score"]
+                rr['q_sent_num']=q_sent_num
+                rr['q_sent_text']=sent.text
+                rr['weight']=weight
+                results.append(rr)
+                output_list.append(r['_source']['doc_id'])
+                weight-=1
         q_sent_num+=1
     if len(output_list)>0:
         logger.info(len(output_list))

@@ -102,6 +102,11 @@ data_sci_capabilities = [
     'Equipment / Facility Monitoring'
 ]
 
+test_text11 = (
+        "I have a background in evolutionary biology, bioinformatics, data science, cancer informatics, NLP "
+    "and software engineering.  I'm now focusing on predicting causal mechanisms using multivariate data and graphs."
+    )
+
 def person_query(text):
     logger.info(text)
     url = f'{api_url}/search/'
@@ -161,13 +166,10 @@ def q1():
 
 if __name__ == "__main__":
     #q1()
-    text = (
-        "I have a background in evolutionary biology, bioinformatics, data science, cancer informatics, NLP "
-    "and software engineering.  I'm now focusing on predicting causal mechanisms using multivariate data and graphs."
-    )
-    output_query(text)
-    person_query(text)
-    vec_query(text)
+    text = test_text5
+    #output_query(text)
+    #person_query(text)
+    #vec_query(text)
     full_text_query(text)
     #for qtext in data_sci_capabilities[2:3]:
     #    vec_query(qtext)
