@@ -13,9 +13,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 # globals
 nlp = load_spacy_model()
 
-@app.get("/")
-def read_root():
-    return {"Researcher Searcher"}
+#@app.get("/")
+#def read_root():
+#    return {"Researcher Searcher"}
 
 class SearchMethods(str, Enum):
     f = "full"
@@ -28,12 +28,13 @@ class CollabFilter(str, Enum):
     n = "no"
     a = "all"
 
-@app.get("/search/", description=(
+@app.post("/search/", description=(
     "Search via a number of methods\n"
     "- for a person, using sentence text (full)\n"
     "- for a person, using vector embedding of sentences (vec)\n"
     "- for a person, using mean vector (person)\n"
-    "- for an output, using mean vector (output)")
+    "- for an output, using mean vector (output)"),
+    tags=["search"]
 )
 async def run_search(
     query: str = Query(
@@ -70,7 +71,9 @@ async def run_search(
 
 @app.get("/person/",description=(
     "Get a summary of noun chunks for a given person"
-))
+    ),
+    tags=["search"]   
+)
 async def run_person(
     query: str = Query(
         ..., 
@@ -83,7 +86,9 @@ async def run_person(
 @app.get("/collab/",description=(
     "For a given person, find the people who are 'most similar' "
     "with optional co-publication filter"
-))
+    ),
+    tags=["search"]
+)
 async def run_collab(
     query: str = Query(
         ..., 
