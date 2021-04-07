@@ -7,7 +7,7 @@ from scripts.general import load_spacy_model, neo4j_connect
 from scripts.search import es_sent, es_vec, get_person, get_collab, es_person_vec, es_output_vec, get_person
 from enum import Enum   
 
-app = FastAPI()
+app = FastAPI(docs_url="/")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # globals
