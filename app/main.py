@@ -28,7 +28,7 @@ class CollabFilter(str, Enum):
     n = "no"
     a = "all"
 
-@app.post("/search/", description=(
+@app.get("/search/", description=(
     "Search via a number of methods\n"
     "- for a person, using sentence text (full)\n"
     "- for a person, using vector embedding of sentences (vec)\n"
