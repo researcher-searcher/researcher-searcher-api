@@ -113,14 +113,15 @@ def es_sent(nlp,text:str):
         res = standard_query(index_name=vector_index_name,text=sent.text)
         #logger.info(res)
         if res:
-            weight = int(res["hits"]["total"]["value"])
+            weight = len(res['hits']['hits'])
             for r in res['hits']['hits']:
                 rr = r['_source']
                 rr['index']=r['_index']
                 rr['score']=r["_score"]
                 rr['q_sent_num']=q_sent_num
                 rr['q_sent_text']=sent.text
-                rr['weight']=weight
+                # square the weight to improve results for large number of hits
+                rr['weight']=weight*weight
                 results.append(rr)
                 output_list.append(r['_source']['doc_id'])
                 weight-=1
@@ -149,13 +150,13 @@ def es_vec(nlp,text:str):
             weight = len(res)
             logger.info(weight)
             for r in res:
-                if r["score"] > 0.5:
-                    r['q_sent_num']=q_sent_num
-                    r['q_sent_text']=sent.text
-                    r['weight']=weight
-                    results.append(r)
-                    output_list.append(r['url'])
-                    weight-=1
+                r['q_sent_num']=q_sent_num
+                r['q_sent_text']=sent.text
+                # square the weight to improve results for large number of hits
+                r['weight']=weight*weight
+                results.append(r)
+                output_list.append(r['url'])
+                weight-=1
         q_sent_num+=1
     if len(output_list)>0:
         op = output_to_people(list(set(output_list)))
@@ -178,9 +179,8 @@ def es_person_vec(nlp,text:str):
         output_list = []
         if res:
             for r in res:
-                if r["score"] > 0.5:
-                    results.append(r)
-                    output_list.append(r['doc_id'])
+                results.append(r)
+                output_list.append(r['doc_id'])
         if len(output_list)>0:
             es_df = pd.DataFrame(results)
             logger.info('here')
@@ -207,9 +207,8 @@ def es_output_vec(nlp,text:str):
         results = []
         output_list = []
         for r in res:
-            if r["score"] > 0.5:
-                results.append(r)
-                output_list.append(r['doc_id'])
+            results.append(r)
+            output_list.append(r['doc_id'])
         if len(output_list)>0:
             es_df = pd.DataFrame(results)
             logger.info('here')
@@ -252,30 +251,67 @@ def get_person(text:str,method:str='fuzzy'):
     #logger.info(f'\n{df}')
     return df
 
-def get_colab(person:str):
-    logger.info(f'get_colab {person}')
-    query = """
-        MATCH 
-            (p1:Person)-[pp:PERSON_PERSON]-(p2) 
-        WHERE 
-            p1._id = '{person}'
-        WITH
-            p1,pp,p2 
-        ORDER 
-            by pp.score desc 
-        LIMIT
-            100
-        MATCH 
-            (p2) 
-        WHERE 
-            not (p1)-[:PERSON_OUTPUT]-(:Output)-[:PERSON_OUTPUT]-(p2) 
-        RETURN
-            p2.name as name,p2.url as url,pp.score as score 
-        ORDER
-            by score desc 
-        LIMIT
-            10
-    """.format(person=person)
+def get_colab(person:str,method:str):
+    logger.info(f'get_colab {person} {method}')
+    if method == 'no':
+        query = """
+            MATCH 
+                (p1:Person)-[pp:PERSON_PERSON]-(p2) 
+            WHERE 
+                p1._id = '{person}'
+            WITH
+                p1,pp,p2 
+            ORDER 
+                by pp.score desc 
+            LIMIT
+                100
+            MATCH 
+                (p2) 
+            WHERE 
+                not (p1)-[:PERSON_OUTPUT]-(:Output)-[:PERSON_OUTPUT]-(p2) 
+            RETURN
+                p2.name as name,p2.url as url,pp.score as score 
+            ORDER
+                by score desc 
+            LIMIT
+                10
+        """.format(person=person)
+    elif method == 'yes':
+         query = """
+            MATCH 
+                (p1:Person)-[pp:PERSON_PERSON]-(p2) 
+            WHERE 
+                p1._id = '{person}'
+            WITH
+                p1,pp,p2 
+            ORDER 
+                by pp.score desc 
+            LIMIT
+                100
+            MATCH 
+                (p2) 
+            WHERE 
+                (p1)-[:PERSON_OUTPUT]-(:Output)-[:PERSON_OUTPUT]-(p2) 
+            RETURN
+                p2.name as name,p2.url as url,pp.score as score 
+            ORDER
+                by score desc 
+            LIMIT
+                10
+        """.format(person=person)
+    else:
+        query = """
+            MATCH 
+                (p1:Person)-[pp:PERSON_PERSON]-(p2) 
+            WHERE 
+                p1._id = '{person}'
+            RETURN
+                p2.name as name,p2.url as url,pp.score as score 
+            ORDER 
+                by score desc 
+            LIMIT
+                10
+        """.format(person=person)
     logger.info(query)
     data=session.run(query).data()
     df = pd.json_normalize(data).to_dict('records')

@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
 from scripts.general import load_spacy_model, neo4j_connect
 from scripts.search import es_sent, es_vec, get_person, get_colab, es_person_vec, es_output_vec, get_person
-from enum import Enum
+from enum import Enum   
 
 app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -23,6 +23,11 @@ class SearchMethods(str, Enum):
     p = "person"
     o = "output"
 
+class ColabFilter(str, Enum):
+    y = "yes"
+    n = "no"
+    a = "all"
+
 @app.get("/search/", description=(
     "Search via a number of methods\n"
     "- for a person, using sentence text (full)\n"
@@ -36,10 +41,10 @@ async def run_search(
         title="Search Query", 
         description="the text to use for the search query",
         min_length=3, 
-        max_length=500), 
+        max_length=10000
+        ), 
     method: SearchMethods = Query(
         SearchMethods.f,
-        #SearchMethods = SearchMethods.f,
         title="Search Method", 
         description="the method to use for the search query (full, vec, person or output)"),
     #token: str = Depends(oauth2_scheme)
@@ -63,7 +68,9 @@ async def run_search(
     else:
         return {"query": query, "res": 'NA'}
 
-@app.get("/person/")
+@app.get("/person/",description=(
+    "Get a summary of noun chunks for a given person"
+))
 async def run_person(
     query: str = Query(
         ..., 
@@ -73,15 +80,24 @@ async def run_person(
     data = get_person(query)
     return {"query": query, "res":data}
 
-@app.get("/colab/")
+@app.get("/colab/",description=(
+    "For a given person, find the people who are 'most similar' "
+    "with optional co-publication filter"
+))
 async def run_colab(
     query: str = Query(
         ..., 
         title="Collaboration recommender", 
-        description="the email address of the person")
-    ):
-    data = get_colab(query)
-    return {"query": query, "res":data}
+        description="the email address of the person"
+    ),
+    method: ColabFilter = Query(
+        ColabFilter.y,
+        title="Shared output filter", 
+        description="restrict results to those with shared output (yes), without (no) or all (all)"),
+    #token: str = Depends(oauth2_scheme)
+    ): 
+    data = get_colab(query,method)
+    return {"query": query, "method":method, "res":data}
 
 # customise the swagger interface    
 def custom_openapi():

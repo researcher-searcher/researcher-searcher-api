@@ -166,7 +166,7 @@ def q1():
 
 if __name__ == "__main__":
     #q1()
-    text = test_text5
+    text = test_text7
     #output_query(text)
     #person_query(text)
     #vec_query(text)
