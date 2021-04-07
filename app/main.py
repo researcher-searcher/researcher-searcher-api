@@ -1,12 +1,14 @@
 from typing import Optional
-from fastapi import FastAPI, Query
+from fastapi import Depends, FastAPI, Query
 from fastapi.openapi.utils import get_openapi
+from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
 from scripts.general import load_spacy_model, neo4j_connect
 from scripts.search import es_sent, es_vec, get_person, get_colab, es_person_vec, es_output_vec, get_person
 from enum import Enum
 
 app = FastAPI()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # globals
 nlp = load_spacy_model()
@@ -23,10 +25,10 @@ class SearchMethods(str, Enum):
 
 @app.get("/search/", description=(
     "Search via a number of methods\n"
-    "- search for person using sentence text (full)\n"
-    "- search for a person using vector embedding of sentences (vec)\n"
-    "- search for a person using mean vector (person)\n"
-    "- search for an output using mean vector (output)")
+    "- for a person, using sentence text (full)\n"
+    "- for a person, using vector embedding of sentences (vec)\n"
+    "- for a person, using mean vector (person)\n"
+    "- for an output, using mean vector (output)")
 )
 async def run_search(
     query: str = Query(
@@ -39,7 +41,8 @@ async def run_search(
         SearchMethods.f,
         #SearchMethods = SearchMethods.f,
         title="Search Method", 
-        description="the method to use for the search query (full, vec, person or output)")
+        description="the method to use for the search query (full, vec, person or output)"),
+    #token: str = Depends(oauth2_scheme)
     ):   
     # standard match against query sentences
     if method == 'full':
@@ -94,9 +97,3 @@ def custom_openapi():
     return app.openapi_schema
 
 app.openapi = custom_openapi
-
-#todo
-# sort results above using weighted mean or something similar.
-# add collaboration recommender (closest person with no shared output)
-# add output recommender (closest output to text)
-    

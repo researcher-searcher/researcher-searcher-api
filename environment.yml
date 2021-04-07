@@ -20,3 +20,4 @@ dependencies:
     - simple-parsing
     - spacy
     - scispacy
+    - pytest
