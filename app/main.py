@@ -82,6 +82,7 @@ async def run_person(
     ):
     data = get_person(query)
     return {"query": query, "res":data}
+    
 
 @app.get("/collab/",description=(
     "For a given person, find the people who are 'most similar' "

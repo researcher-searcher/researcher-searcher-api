@@ -280,7 +280,7 @@ def mean_vector_query(
             "query": {"match_all": {}},
             "script": {
                 # +1 to deal with negative results (script score function must not produce negative scores)
-                "source": "cosineSimilarity(params.query_vector, doc['vector']) +1",
+                "source": "cosineSimilarity(params.query_vector, 'vector') +1",
                 "params": {"query_vector": query_vector},
             },
         }
