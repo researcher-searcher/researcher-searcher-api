@@ -258,13 +258,13 @@ def get_colab(person:str):
         MATCH 
             (p1:Person)-[pp:PERSON_PERSON]-(p2) 
         WHERE 
-            p1.url = '{person}'
+            p1._id = '{person}'
         WITH
             p1,pp,p2 
         ORDER 
             by pp.score desc 
         LIMIT
-            1000 
+            100
         MATCH 
             (p2) 
         WHERE 

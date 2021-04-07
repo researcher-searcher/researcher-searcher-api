@@ -69,7 +69,6 @@ async def run_person(
     ):
     data = get_person(query)
     return {"query": query, "res":data}
-  
 
 @app.get("/colab/")
 async def run_colab(
@@ -79,7 +78,7 @@ async def run_colab(
         description="the email address of the person")
     ):
     data = get_colab(query)
-    return {"query": query, "method": method, "res":data}
+    return {"query": query, "res":data}
 
 # customise the swagger interface    
 def custom_openapi():
