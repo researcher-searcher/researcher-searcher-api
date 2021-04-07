@@ -4,7 +4,7 @@ from fastapi.openapi.utils import get_openapi
 from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
 from scripts.general import load_spacy_model, neo4j_connect
-from scripts.search import es_sent, es_vec, get_person, get_colab, es_person_vec, es_output_vec, get_person
+from scripts.search import es_sent, es_vec, get_person, get_collab, es_person_vec, es_output_vec, get_person
 from enum import Enum   
 
 app = FastAPI()
@@ -23,7 +23,7 @@ class SearchMethods(str, Enum):
     p = "person"
     o = "output"
 
-class ColabFilter(str, Enum):
+class CollabFilter(str, Enum):
     y = "yes"
     n = "no"
     a = "all"
@@ -80,23 +80,23 @@ async def run_person(
     data = get_person(query)
     return {"query": query, "res":data}
 
-@app.get("/colab/",description=(
+@app.get("/collab/",description=(
     "For a given person, find the people who are 'most similar' "
     "with optional co-publication filter"
 ))
-async def run_colab(
+async def run_collab(
     query: str = Query(
         ..., 
         title="Collaboration recommender", 
         description="the email address of the person"
     ),
-    method: ColabFilter = Query(
-        ColabFilter.y,
+    method: CollabFilter = Query(
+        CollabFilter.y,
         title="Shared output filter", 
         description="restrict results to those with shared output (yes), without (no) or all (all)"),
     #token: str = Depends(oauth2_scheme)
     ): 
-    data = get_colab(query,method)
+    data = get_collab(query,method)
     return {"query": query, "method":method, "res":data}
 
 # customise the swagger interface    

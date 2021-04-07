@@ -251,8 +251,8 @@ def get_person(text:str,method:str='fuzzy'):
     #logger.info(f'\n{df}')
     return df
 
-def get_colab(person:str,method:str):
-    logger.info(f'get_colab {person} {method}')
+def get_collab(person:str,method:str):
+    logger.info(f'get_collab {person} {method}')
     if method == 'no':
         query = """
             MATCH 
