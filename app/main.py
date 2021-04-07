@@ -4,6 +4,7 @@ from fastapi.openapi.utils import get_openapi
 from loguru import logger
 from scripts.general import load_spacy_model, neo4j_connect
 from scripts.search import es_sent, es_vec, get_person, get_colab, es_person_vec, es_output_vec, get_person
+from enum import Enum
 
 app = FastAPI()
 
@@ -14,7 +15,19 @@ nlp = load_spacy_model()
 def read_root():
     return {"Researcher Searcher"}
 
-@app.get("/search/")
+class SearchMethods(str, Enum):
+    f = "full"
+    v = "vec"
+    p = "person"
+    o = "output"
+
+@app.get("/search/", description=(
+    "Search via a number of methods\n"
+    "- search for person using sentence text (full)\n"
+    "- search for a person using vector embedding of sentences (vec)\n"
+    "- search for a person using mean vector (person)\n"
+    "- search for an output using mean vector (output)")
+)
 async def run_search(
     query: str = Query(
         ..., 
@@ -22,8 +35,9 @@ async def run_search(
         description="the text to use for the search query",
         min_length=3, 
         max_length=500), 
-    method: str = Query(
-        'full',
+    method: SearchMethods = Query(
+        SearchMethods.f,
+        #SearchMethods = SearchMethods.f,
         title="Search Method", 
         description="the method to use for the search query (full, vec, person or output)")
     ):   
@@ -47,17 +61,23 @@ async def run_search(
         return {"query": query, "res": 'NA'}
 
 @app.get("/person/")
-async def run_person(query: str, method: Optional[str] = None):
+async def run_person(
+    query: str = Query(
+        ..., 
+        title="Person Query", 
+        description="the email address of the person")
+    ):
     data = get_person(query)
-    return {"query": query, "method": method, "res":data}
+    return {"query": query, "res":data}
   
 
 @app.get("/colab/")
-async def run_colab(query: str, method: Optional[str] = None):   
-    #if method == 'exact':
-    #    person = get_person(text=query, method=method)
-    #else:
-    #    person = get_person(text=query)    
+async def run_colab(
+    query: str = Query(
+        ..., 
+        title="Collaboration recommender", 
+        description="the email address of the person")
+    ):
     data = get_colab(query)
     return {"query": query, "method": method, "res":data}
 
