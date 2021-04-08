@@ -284,11 +284,11 @@ def get_collab(person: str, method: str):
     if method == "no":
         query = """
             MATCH 
-                (p1:Person)-[pp:PERSON_PERSON]-(p2) 
+                (p1:Person)-[pp:PERSON_PERSON]-(p2)-[r:PERSON_ORG]-(org:Org) 
             WHERE 
                 p1._id = '{person}'
             WITH
-                p1,pp,p2 
+                p1,pp,p2,org
             ORDER 
                 by pp.score desc 
             LIMIT
@@ -298,7 +298,7 @@ def get_collab(person: str, method: str):
             WHERE 
                 not (p1)-[:PERSON_OUTPUT]-(:Output)-[:PERSON_OUTPUT]-(p2) 
             RETURN
-                p2.name as name,p2.url as url,pp.score as score 
+                p2.name as name,p2.url as url, collect(org.name) as org, pp.score as score
             ORDER
                 by score desc 
             LIMIT
@@ -309,11 +309,11 @@ def get_collab(person: str, method: str):
     elif method == "yes":
         query = """
             MATCH 
-                (p1:Person)-[pp:PERSON_PERSON]-(p2) 
+                (p1:Person)-[pp:PERSON_PERSON]-(p2)-[r:PERSON_ORG]-(org:Org)  
             WHERE 
                 p1._id = '{person}'
             WITH
-                p1,pp,p2 
+                p1,pp,p2,org
             ORDER 
                 by pp.score desc 
             LIMIT
@@ -323,7 +323,7 @@ def get_collab(person: str, method: str):
             WHERE 
                 (p1)-[:PERSON_OUTPUT]-(:Output)-[:PERSON_OUTPUT]-(p2) 
             RETURN
-                p2.name as name,p2.url as url,pp.score as score 
+                p2.name as name,p2.url as url, collect(org.name) as org, pp.score as score 
             ORDER
                 by score desc 
             LIMIT
@@ -334,11 +334,11 @@ def get_collab(person: str, method: str):
     else:
         query = """
             MATCH 
-                (p1:Person)-[pp:PERSON_PERSON]-(p2) 
+                (p1:Person)-[pp:PERSON_PERSON]-(p2)-[r:PERSON_ORG]-(org:Org)
             WHERE 
                 p1._id = '{person}'
             RETURN
-                p2.name as name,p2.url as url,pp.score as score 
+                p2.name as name,p2.url as url, collect(org.name) as org, pp.score as score 
             ORDER 
                 by score desc 
             LIMIT
