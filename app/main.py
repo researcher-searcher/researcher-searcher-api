@@ -93,9 +93,15 @@ async def run_search(
 async def run_person(
     query: str = Query(
         ..., title="Person Query", description="the email address of the person"
-    )
+    ),
+    limit: int = Query(
+        10,
+        title="Number of results to return",
+        description="number of results to return",
+        le=100
+    ),
 ):
-    data = get_person(query)
+    data = get_person(query,limit)
     return {"query": query, "res": data}
 
 

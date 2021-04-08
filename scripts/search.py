@@ -350,34 +350,24 @@ def get_collab(person: str, method: str):
     return df
 
 
-def get_person(person: str):
+def get_person(person: str, limit: int):
     logger.info(f"get_person {person}")
     person = person.strip().lower()
     query = """
         match 
-            (p:Person)-[:PERSON_OUTPUT]-(o:Output) 
-        WHERE
+            (p:Person)-[r]-(n:NounChunk) 
+        where
             p._id = '{person}' 
-        RETURN 
-            p.name as person_name,p.url as person_id, o.id as output_id;
+        return 
+            n.text as text,r.score as score order by r.score desc limit {limit};
     """.format(
-        person=person
+        person=person,
+        limit=limit
     )
     logger.info(query)
     data = session.run(query).data()
-    df = pd.json_normalize(data)
-    logger.info(df)
-
-    # get the noun chunks from elastic
-    filterData = {"terms": {"doc_id": list(df["output_id"])}}
-    res = filter_query(index_name="*sentence_nouns", filterData=filterData)
-    if res:
-        results = []
-        logger.info(res["hits"]["total"]["value"])
-        for r in res["hits"]["hits"]:
-            rr = r["_source"]
-            results.append(rr["noun_phrase"].lower())
-        ctr = collections.Counter(results).most_common(20)
-        return ctr
+    if data:
+        return data
     else:
         return []
+
