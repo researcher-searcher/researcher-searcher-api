@@ -13,6 +13,7 @@ GRAPH_BOLT_PORT = env.str("GRAPH_BOLT_PORT")
 GRAPH_USER = env.str("GRAPH_USER")
 GRAPH_PASSWORD = env.str("GRAPH_PASSWORD")
 
+
 def load_spacy_model():
     model_name = "en_core_web_trf"
     model_name = "en_core_web_lg"
@@ -25,19 +26,19 @@ def load_spacy_model():
     # nlp.add_pipe("abbreviation_detector")
 
     # add max length for transformer
-    #if model_name == 'en_core_web_trf':
+    # if model_name == 'en_core_web_trf':
     #    nlp.max_length = 512
-    #nlp.max_length=10000
+    # nlp.max_length=10000
     logger.info("Done...")
     return nlp
 
 
 def neo4j_connect():
     from neo4j import GraphDatabase, basic_auth
+
     auth_token = basic_auth(GRAPH_USER, GRAPH_PASSWORD)
     driver = GraphDatabase.driver(
         "bolt://" + GRAPH_HOST + ":" + GRAPH_BOLT_PORT, auth=auth_token, encrypted=False
     )
     session = driver.session()
     return session
-

@@ -6,7 +6,7 @@ from loguru import logger
 from scripts.es_functions import vector_query, standard_query
 from scripts.general import load_spacy_model, neo4j_connect
 
-api_url = 'http://localhost:8000'
+api_url = "http://localhost:8000"
 pp = pprint.PrettyPrinter(indent=4)
 
 test_text1 = (
@@ -42,13 +42,11 @@ test_text4 = (
     "flow cytometry provides an efficient and rapid approach for the categorisation of hereditary spherocytosis arising "
     "from ankyrin deficiency."
 )
-test_text5 = (
-    "Risk factors for breast cancer"
-)
+test_text5 = "Risk factors for breast cancer"
 
 test_text6 = "triples extracted from the biomedical literature by SemMedDB"
 
-#https://pubmed.ncbi.nlm.nih.gov/25751625/
+# https://pubmed.ncbi.nlm.nih.gov/25751625/
 # compare this to the copy/paste text - find expertise results
 # https://research-information.bris.ac.uk/en/concepts/copypaste/
 test_text7 = (
@@ -77,101 +75,107 @@ test_text8 = (
     "the years following early adolescence."
 )
 
-test_text9 = (
-    "reinforcement learning"
-)
+test_text9 = "reinforcement learning"
 
-test_text10 = (
-    'gwas genome wide association study'
-)
+test_text10 = "gwas genome wide association study"
 
 data_sci_capabilities = [
-    'Human presence and detection and recognition',
-    'Machine learning',
-    'Natural language processing',
-    'Machine perception - machine/computer vision',
-    'Machine perceptoion - facial recognition',
-    'Automation and robotics',
-    'Social intelligence',
-    'AI (General intelligence)',
-    'Image anomaly detection and classification',
-    'Text to speech / speech to text',
-    'AI for manufacturing process control',
-    'Data mining / advanced analytics / trend analysis',
-    'Social justice / criminal justice / data ethics/AI',
-    'Equipment / Facility Monitoring'
+    "Human presence and detection and recognition",
+    "Machine learning",
+    "Natural language processing",
+    "Machine perception - machine/computer vision",
+    "Machine perceptoion - facial recognition",
+    "Automation and robotics",
+    "Social intelligence",
+    "AI (General intelligence)",
+    "Image anomaly detection and classification",
+    "Text to speech / speech to text",
+    "AI for manufacturing process control",
+    "Data mining / advanced analytics / trend analysis",
+    "Social justice / criminal justice / data ethics/AI",
+    "Equipment / Facility Monitoring",
 ]
 
 test_text11 = (
-        "I have a background in evolutionary biology, bioinformatics, data science, cancer informatics, NLP "
+    "I have a background in evolutionary biology, bioinformatics, data science, cancer informatics, NLP "
     "and software engineering.  I'm now focusing on predicting causal mechanisms using multivariate data and graphs."
-    )
+)
+
 
 def person_query(text):
     logger.info(text)
-    url = f'{api_url}/search/'
-    params = {"query":text,"method":"person"}
-    res = requests.get(url,params).json()
-    #logger.info(res['res'])
-    df = pd.json_normalize(res['res'])
-    logger.info(f'\n{df.head(n=20)}')
+    url = f"{api_url}/search/"
+    params = {"query": text, "method": "person"}
+    res = requests.get(url, params).json()
+    # logger.info(res['res'])
+    df = pd.json_normalize(res["res"])
+    logger.info(f"\n{df.head(n=20)}")
+
 
 def output_query(text):
     logger.info(text)
-    url = f'{api_url}/search/'
-    params = {"query":text,"method":"output"}
-    res = requests.get(url,params).json()
-    #logger.info(res['res'])
-    df = pd.json_normalize(res['res'])
-    logger.info(f'\n{df.head(n=20)}')
+    url = f"{api_url}/search/"
+    params = {"query": text, "method": "output"}
+    res = requests.get(url, params).json()
+    # logger.info(res['res'])
+    df = pd.json_normalize(res["res"])
+    logger.info(f"\n{df.head(n=20)}")
+
 
 def vec_query(text):
     logger.info(text)
-    url = f'{api_url}/search/'
-    params = {"query":text,"method":"vec"}
-    res = requests.get(url,params).json()
-    logger.info(pp.pprint(res['res'][0:5]))
-    df = pd.json_normalize(res['res'])
+    url = f"{api_url}/search/"
+    params = {"query": text, "method": "vec"}
+    res = requests.get(url, params).json()
+    logger.info(pp.pprint(res["res"][0:5]))
+    df = pd.json_normalize(res["res"])
     if not df.empty:
-        logger.info(f"\n{df[['person_name','scores','weights','wa','count']].head(n=20)}")
-    #logger.info(f'\n{df.columns}')
+        logger.info(
+            f"\n{df[['person_name','scores','weights','wa','count']].head(n=20)}"
+        )
+    # logger.info(f'\n{df.columns}')
+
 
 def full_text_query(text):
     logger.info(text)
-    url = f'{api_url}/search/'
-    params = {"query":text,"method":"full"}
-    res = requests.get(url,params).json()
-    logger.info(pp.pprint(res['res'][0:5]))
-    df = pd.json_normalize(res['res'])
+    url = f"{api_url}/search/"
+    params = {"query": text, "method": "full"}
+    res = requests.get(url, params).json()
+    logger.info(pp.pprint(res["res"][0:5]))
+    df = pd.json_normalize(res["res"])
     if not df.empty:
-        logger.info(f"\n{df[['person_name','scores','weights','wa','count']].head(n=20)}")
-    #logger.info(f'\n{df.columns}')
+        logger.info(
+            f"\n{df[['person_name','scores','weights','wa','count']].head(n=20)}"
+        )
+    # logger.info(f'\n{df.columns}')
 
 
-#http://localhost:8000/colab/?query=https://research-information.bris.ac.uk/en/persons/lindsey-a-hines
+# http://localhost:8000/colab/?query=https://research-information.bris.ac.uk/en/persons/lindsey-a-hines
 def colab(text):
     logger.info(text)
-    url = f'{api_url}/colab/'
-    params = {"query":text}
-    res = requests.get(url,params).json()
-    logger.info(pp.pprint(res['res']))
-    df = pd.json_normalize(res['res'])
-    logger.info(f'\n{df.head()}')
+    url = f"{api_url}/colab/"
+    params = {"query": text}
+    res = requests.get(url, params).json()
+    logger.info(pp.pprint(res["res"]))
+    df = pd.json_normalize(res["res"])
+    logger.info(f"\n{df.head()}")
+
 
 def q1():
-    qtext = 'natural language processing'
+    qtext = "natural language processing"
     person_query(qtext)
     vec_query(qtext)
     full_text_query(qtext)
 
+
 if __name__ == "__main__":
-    #q1()
+    # q1()
     text = test_text7
-    #output_query(text)
-    #person_query(text)
-    #vec_query(text)
+    # output_query(text)
+    # person_query(text)
+    # vec_query(text)
     full_text_query(text)
-    #for qtext in data_sci_capabilities[2:3]:
+    # for qtext in data_sci_capabilities[2:3]:
     #    vec_query(qtext)
     #    full_text_query(qtext)
-    #colab('https://research-information.bris.ac.uk/en/persons/benjamin-l-elsworth')
+    # colab('https://research-information.bris.ac.uk/en/persons/benjamin-l-elsworth')

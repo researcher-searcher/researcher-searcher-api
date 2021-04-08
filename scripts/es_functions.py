@@ -17,10 +17,13 @@ ES_PASSWORD = env.str("ES_PASSWORD")
 
 TIMEOUT = 300
 chunkSize = 10000
-es = Elasticsearch([f'{ES_HOST}:{ES_PORT}'], http_auth=(ES_USER, ES_PASSWORD), timeout=TIMEOUT)
+es = Elasticsearch(
+    [f"{ES_HOST}:{ES_PORT}"], http_auth=(ES_USER, ES_PASSWORD), timeout=TIMEOUT
+)
 
-TITLE_WEIGHT=1
-ABSTRACT_WEIGHT=1
+TITLE_WEIGHT = 1
+ABSTRACT_WEIGHT = 1
+
 
 def create_vector_index(index_name, dim_size):
     if es.indices.exists(index_name, request_timeout=TIMEOUT):
@@ -109,9 +112,9 @@ def index_vector_data(df, index_name):
             bulk_data = []
         # print(line.decode('utf-8'))
         if np.count_nonzero(rows["vector"]) == 0:
-            #logger.info(
+            # logger.info(
             #    f"{rows['url']} {rows['sent_num']} returned empty vector so skipping"
-            #)
+            # )
             continue
         else:
             data_dict = {
@@ -148,6 +151,7 @@ def index_vector_data(df, index_name):
     except TIMEOUT:
         print("counting index timeout", index_name)
 
+
 def index_noun_data(df, index_name):
     print("Indexing data...")
     # create_index(index_name)
@@ -179,7 +183,7 @@ def index_noun_data(df, index_name):
             "doc_id": rows["url"],
             "year": rows["year"],
             "sent_num": rows["sent_num"],
-            "noun_phrase": rows["noun_phrase"]
+            "noun_phrase": rows["noun_phrase"],
         }
         op_dict = {
             "_index": index_name,
@@ -207,6 +211,7 @@ def index_noun_data(df, index_name):
         print("Number of records in index", index_name, "=", esRecords)
     except TIMEOUT:
         print("counting index timeout", index_name)
+
 
 def delete_index(index_name):
     logger.info(f"Deleting {index_name}")
@@ -239,9 +244,9 @@ def vector_query(
                 "query": script_query,
                 "_source": {"includes": ["doc_id", "year", "sent_num", "sent_text"]},
                 "indices_boost": [
-                    { "title_sentence_vectors": TITLE_WEIGHT },
-                    { "abstract_sentence_vectors": ABSTRACT_WEIGHT }
-                ]
+                    {"title_sentence_vectors": TITLE_WEIGHT},
+                    {"abstract_sentence_vectors": ABSTRACT_WEIGHT},
+                ],
             },
         )
         search_time = time.time() - search_start
@@ -249,7 +254,7 @@ def vector_query(
         logger.info(f"Search time: {search_time}")
         results = []
         for hit in response["hits"]["hits"]:
-            #logger.debug(hit)
+            # logger.debug(hit)
             # -1 to deal with +1 above
             # print("id: {}, score: {}".format(hit["_id"], hit["_score"] - 1))
             # print(hit["_source"])
@@ -270,6 +275,7 @@ def vector_query(
         return results
     except:
         return []
+
 
 def mean_vector_query(
     index_name, query_vector, record_size=100000, search_size=100, score_min=0
@@ -292,7 +298,7 @@ def mean_vector_query(
             body={
                 "size": search_size,
                 "query": script_query,
-                "_source": {"includes": ["doc_id"]}
+                "_source": {"includes": ["doc_id"]},
             },
         )
         search_time = time.time() - search_start
@@ -300,7 +306,7 @@ def mean_vector_query(
         logger.info(f"Search time: {search_time}")
         results = []
         for hit in response["hits"]["hits"]:
-            #logger.debug(hit)
+            # logger.debug(hit)
             # -1 to deal with +1 above
             # print("id: {}, score: {}".format(hit["_id"], hit["_score"] - 1))
             # print(hit["_source"])
@@ -316,50 +322,34 @@ def mean_vector_query(
                 )
         return results
     except:
-        logger.warning('ES search failed')
+        logger.warning("ES search failed")
         return []
 
-def standard_query(
-    index_name, text
-):
-    body={
+
+def standard_query(index_name, text):
+    body = {
         "size": 100,
-        "query": {
-             "match": {
-                "sent_text": {
-                    "query": text     
-                }
-            }
-        },
-        "_source": ["doc_id","sent_num","sent_text"],
+        "query": {"match": {"sent_text": {"query": text}}},
+        "_source": ["doc_id", "sent_num", "sent_text"],
         "indices_boost": [
-            { "title_sentence_vectors": TITLE_WEIGHT },
-            { "abstract_sentence_vectors": ABSTRACT_WEIGHT }
-        ]
+            {"title_sentence_vectors": TITLE_WEIGHT},
+            {"abstract_sentence_vectors": ABSTRACT_WEIGHT},
+        ],
     }
     res = es.search(
-        ignore_unavailable=True,
-        request_timeout=TIMEOUT,
-        index=index_name,
-        body=body
+        ignore_unavailable=True, request_timeout=TIMEOUT, index=index_name, body=body
     )
     return res
 
-def filter_query(index_name,filterData):
-    body={
-            # "from":from_val,
-            "size": 10000,
-            "query": {
-                "bool": {
-                    "filter": filterData
-                }
-            }
-        }
+
+def filter_query(index_name, filterData):
+    body = {
+        # "from":from_val,
+        "size": 10000,
+        "query": {"bool": {"filter": filterData}},
+    }
 
     res = es.search(
-        ignore_unavailable=True,
-        request_timeout=TIMEOUT,
-        index=index_name,
-        body=body
+        ignore_unavailable=True, request_timeout=TIMEOUT, index=index_name, body=body
     )
     return res
