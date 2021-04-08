@@ -23,11 +23,11 @@ top_hits = 100
 def person_info(id_list: list, node_property: str):
     query = """
         match 
-            (p:Person)
+            (o:Org)-[r:PERSON_ORG]-(p:Person)
         WHERE
             p.{property} in {id_list} 
         RETURN 
-            p.name as name, p.url as url, p.email as email;
+            p.name as name, p.url as url, p.email as email, collect(o.name) as org;
     """.format(
         property=node_property, id_list=id_list
     )
@@ -60,11 +60,11 @@ def output_to_people(output_list: list):
     logger.info(f"output_to_people {len(output_list)}")
     query = """
         match 
-            (p:Person)-[:PERSON_OUTPUT]-(o:Output) 
+            (org:Org)-[r:PERSON_ORG]-(p:Person)-[:PERSON_OUTPUT]-(o:Output) 
         WHERE
             o.id in {output_list} 
         RETURN 
-            p.name as person_name,p.url as person_id, o.id as output_id;
+            p.name as person_name,p.url as person_id, o.id as output_id, collect(org.name) as org;
     """.format(
         output_list=output_list
     )
@@ -94,25 +94,28 @@ def convert_df_to_wa(results_df, person_df, doc_col):
     df_group = m.groupby(by=["person_id", "person_name"])
     wa = df_group.apply(weighted_average)
     df = df_group.size().reset_index(name="count")
+    logger.info(df.head())
+    
+    #create single list for orgs
+    orgs = list(df_group["org"].apply(list))
+    unique_orgs = []
+    for o in orgs:
+        unique_orgs.append(o[0])
+    df['org'] = unique_orgs
+    
     # add weighted average
     df["wa"] = list(wa)
-    # create lists of sentences and output ids to provide source of matches
-    weights = list(df_group["weight"].apply(list))
-    scores = list(df_group["score"].apply(list))
-    sent_num = list(df_group["sent_num"].apply(list))
-    q_sent_num = list(df_group["q_sent_num"].apply(list))
-    sent_text = list(df_group["sent_text"].apply(list))
-    q_sent_text = list(df_group["q_sent_text"].apply(list))
-    output_list = list(df_group["output_id"].apply(list))
-    index_list = list(df_group["index"].apply(list))
-    df["weights"] = weights
-    df["scores"] = scores
-    df["m_sent_num"] = sent_num
-    df["q_sent_num"] = q_sent_num
-    df["m_sent_text"] = sent_text
-    df["q_sent_text"] = q_sent_text
-    df["output"] = output_list
-    df["index"] = index_list
+    
+    # create lists for each group
+    df["weights"] = list(df_group["weight"].apply(list))
+    df["scores"] = list(df_group["score"].apply(list))
+    df["m_sent_num"] = list(df_group["sent_num"].apply(list))
+    df["q_sent_num"] = list(df_group["q_sent_num"].apply(list))
+    df["m_sent_text"] = list(df_group["sent_text"].apply(list))
+    df["q_sent_text"] = list(df_group["q_sent_text"].apply(list))
+    df["output"] = list(df_group["output_id"].apply(list))
+    df["index"] = list(df_group["index"].apply(list))
+
     df.sort_values(by="wa", ascending=False, inplace=True)
     return df
 
