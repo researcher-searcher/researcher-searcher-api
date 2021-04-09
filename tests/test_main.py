@@ -42,7 +42,7 @@ def test_person():
     response = client.get("/person/?query=ben.elsworth@bristol.ac.uk")
     assert response.status_code == 200
     assert list(response.json().keys()) == ["query", "res"]
-    assert len(response.json()["res"]) > 10
+    assert len(response.json()["res"]) > 1
 
 
 def test_collab():
