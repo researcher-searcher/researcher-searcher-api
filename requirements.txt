@@ -11,6 +11,7 @@ pip
 setuptools
 wheel
 spacy
-scispacy
-pydantic==0.18.2
+#scispacy
+fastapi==0.63.0
+#pydantic==0.18.2
 pytest

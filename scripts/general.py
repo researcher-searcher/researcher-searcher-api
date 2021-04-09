@@ -1,4 +1,4 @@
-import scispacy
+#import scispacy
 import spacy
 import numpy as np
 from scipy.spatial import distance
