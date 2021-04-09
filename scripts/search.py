@@ -12,8 +12,8 @@ from scripts.general import neo4j_connect
 from loguru import logger
 
 vector_index_name = "use_*_sentence_vectors"
-person_index_name = "person_vectors"
-output_index_name = "output_vectors"
+person_index_name = "use_person_vectors"
+output_index_name = "use_output_vectors"
 
 session = neo4j_connect()
 

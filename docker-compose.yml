@@ -10,6 +10,6 @@ services:
       - 8887:80
     environment:
       - MAX_WORKERS=4
-      - TIMEOUT=300
+      - TIMEOUT=3000
     volumes:
       - ./:/app
