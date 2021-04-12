@@ -128,6 +128,9 @@ def es_sent(nlp, text: str):
     results = []
     output_list = []
     for sent in doc.sents:
+        # check if sentence is suitable
+        if len(sent.text.strip())<3:
+            continue
         logger.info(f"##### {q_sent_num} {sent.text} ######")
         res = standard_query(index_name=vector_index_name, text=sent.text)
         # logger.info(res)
@@ -154,14 +157,16 @@ def es_sent(nlp, text: str):
     else:
         return []
 
-
 def es_vec(nlp, text: str):
     doc = nlp(text)
     q_sent_num = 0
     results = []
     output_list = []
     for sent in doc.sents:
-        logger.info(f"##### {q_sent_num} {sent} ######")
+        # check if sentence is suitable
+        if len(sent.text.strip())<3:
+            continue
+        logger.info(f"##### {q_sent_num} {sent} {len(sent.text.strip())} ######")
         # vectors
         sent_vec = sent.vector
         res = vector_query(index_name=vector_index_name, query_vector=sent_vec)
