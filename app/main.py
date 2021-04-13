@@ -79,12 +79,12 @@ async def run_search(
 ):
     # standard match against query sentences
     if method == "full":
-        res = es_sent(nlp=nlp, text=query)
-        return {"query": query, "method": method, "res": res, 'year_range':[year_min,year_max]}
+        res = es_sent(nlp=nlp, text=query, year_range=[year_min, year_max])
+        return {"query": query, "method": method, 'year_range':[year_min,year_max], "res": res}
     # sentence vector match against query sentences
     elif method == "vec":
         res = es_vec(nlp=nlp, text=query)
-        return {"query": query, "method": method, "res": res}
+        return {"query": query, "method": method, 'year_range':[year_min,year_max], "res": res}
     # people vector match against query
     elif method == "person":
         res = es_person_vec(nlp=nlp, text=query)

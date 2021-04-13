@@ -131,7 +131,30 @@ def mean_vector_query(
 def standard_query(index_name, text, year_range):
     body = {
         "size": 100,
-        "query": {"match": {"sent_text": {"query": text}}},
+        #"query": 
+        #    {"match": {"sent_text": {"query": text}}
+        #},
+        "query": {
+            "bool" : {
+            "must" : [
+                {
+                "match": {
+                    "sent_text": {
+                    "query": text     
+                    }
+                }
+                },
+                {
+                "range": {
+                    "year": {
+                    "from": year_range[0],
+                    "to": year_range[1]
+                    }
+                }
+                }
+            ]
+            }
+        },
         "_source": ["doc_id", "sent_num", "sent_text", "year"],
         "indices_boost": [
             {"title_sentence_vectors": TITLE_WEIGHT},
