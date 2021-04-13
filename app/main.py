@@ -83,7 +83,7 @@ async def run_search(
         return {"query": query, "method": method, 'year_range':[year_min,year_max], "res": res}
     # sentence vector match against query sentences
     elif method == "vec":
-        res = es_vec(nlp=nlp, text=query)
+        res = es_vec(nlp=nlp, text=query, year_range=[year_min, year_max])
         return {"query": query, "method": method, 'year_range':[year_min,year_max], "res": res}
     # people vector match against query
     elif method == "person":

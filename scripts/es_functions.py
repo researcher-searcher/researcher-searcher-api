@@ -25,11 +25,25 @@ TITLE_WEIGHT = 1
 ABSTRACT_WEIGHT = 1
 
 def vector_query(
-    index_name, query_vector, record_size=100000, search_size=100, score_min=0
+    index_name, query_vector, record_size=100000, search_size=100, score_min=0, year_range=[]
 ):
     script_query = {
         "script_score": {
-            "query": {"match_all": {}},
+            "query": {
+                "bool" : {
+                "must" : [{
+                    "match_all": {}
+                },
+                {
+                    "range": {
+                        "year": {
+                        "from": year_range[0],
+                        "to": year_range[1]
+                        }
+                    }
+                }]
+                }
+            },
             "script": {
                 # +1 to deal with negative results (script score function must not produce negative scores)
                 "source": "cosineSimilarity(params.query_vector, 'sent_vector') +1",
@@ -131,28 +145,23 @@ def mean_vector_query(
 def standard_query(index_name, text, year_range):
     body = {
         "size": 100,
-        #"query": 
-        #    {"match": {"sent_text": {"query": text}}
-        #},
         "query": {
             "bool" : {
-            "must" : [
-                {
+            "must" : [{
                 "match": {
                     "sent_text": {
-                    "query": text     
+                        "query": text     
                     }
                 }
-                },
-                {
+            },
+            {
                 "range": {
                     "year": {
                     "from": year_range[0],
                     "to": year_range[1]
                     }
                 }
-                }
-            ]
+            }]
             }
         },
         "_source": ["doc_id", "sent_num", "sent_text", "year"],

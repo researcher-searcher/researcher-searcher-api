@@ -158,7 +158,7 @@ def es_sent(nlp, text: str, year_range: list):
     else:
         return []
 
-def es_vec(nlp, text: str):
+def es_vec(nlp, text: str, year_range: list):
     doc = nlp(text)
     q_sent_num = 0
     results = []
@@ -170,7 +170,7 @@ def es_vec(nlp, text: str):
         logger.info(f"##### {q_sent_num} {sent} {len(sent.text.strip())} ######")
         # vectors
         sent_vec = sent.vector
-        res = vector_query(index_name=vector_index_name, query_vector=sent_vec)
+        res = vector_query(index_name=vector_index_name, query_vector=sent_vec, year_range=year_range)
         if res:
             logger.info(res[0])
             weight = len(res)
