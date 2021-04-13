@@ -25,7 +25,7 @@ TITLE_WEIGHT = 1
 ABSTRACT_WEIGHT = 1
 
 def vector_query(
-    index_name, query_vector, record_size=100000, search_size=100, score_min=0, year_range=[]
+    index_name:str, query_vector:list, record_size:int=100000, search_size:int=100, score_min:int=0, year_range:list=[1950,2021]
 ):
     script_query = {
         "script_score": {
@@ -94,7 +94,7 @@ def vector_query(
 
 
 def mean_vector_query(
-    index_name, query_vector, record_size=100000, search_size=100, score_min=0
+    index_name:str, query_vector:list, record_size:int=100000, search_size:int=100, score_min:int=0
 ):
     logger.debug(f"mean_vector_query {index_name}")
     script_query = {
@@ -142,7 +142,7 @@ def mean_vector_query(
         return []
 
 
-def standard_query(index_name, text, year_range):
+def standard_query(index_name:str, text:str, year_range:list=[1950,2021]):
     body = {
         "size": 100,
         "query": {
@@ -176,7 +176,7 @@ def standard_query(index_name, text, year_range):
     return res
 
 
-def filter_query(index_name, filterData):
+def filter_query(index_name:str, filterData:str):
     body = {
         # "from":from_val,
         "size": 10000,
