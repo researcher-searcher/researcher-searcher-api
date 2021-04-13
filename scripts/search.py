@@ -115,13 +115,14 @@ def convert_df_to_wa(results_df, person_df, doc_col):
     df["q_sent_text"] = list(df_group["q_sent_text"].apply(list))
     df["output"] = list(df_group["output_id"].apply(list))
     df["index"] = list(df_group["index"].apply(list))
+    df["year"] = list(df_group["year"].apply(list))
 
     df.sort_values(by="wa", ascending=False, inplace=True)
     return df
 
 
 # standard match against sentence text
-def es_sent(nlp, text: str):
+def es_sent(nlp, text: str, year_range: list):
     logger.info(f"Running es_sent with {text}")
     doc = nlp(text)
     q_sent_num = 0
@@ -132,7 +133,7 @@ def es_sent(nlp, text: str):
         if len(sent.text.strip())<3:
             continue
         logger.info(f"##### {q_sent_num} {sent.text} ######")
-        res = standard_query(index_name=vector_index_name, text=sent.text)
+        res = standard_query(index_name=vector_index_name, text=sent.text, year_range=year_range)
         # logger.info(res)
         if res:
             weight = len(res["hits"]["hits"])

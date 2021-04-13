@@ -63,12 +63,24 @@ async def run_search(
         title="Search Method",
         description="the method to use for the search query (full, vec, person or output)",
     ),
+    year_min: int = Query(
+        1950,
+        title="Minimum year",
+        description="minimum year of output",
+        ge=1950
+    ),
+    year_max: int = Query(
+        2021,
+        title="Maximum year",
+        description="maximum year of output",
+        le=2021
+    ),
     # token: str = Depends(oauth2_scheme)
 ):
     # standard match against query sentences
     if method == "full":
         res = es_sent(nlp=nlp, text=query)
-        return {"query": query, "method": method, "res": res}
+        return {"query": query, "method": method, "res": res, 'year_range':[year_min,year_max]}
     # sentence vector match against query sentences
     elif method == "vec":
         res = es_vec(nlp=nlp, text=query)

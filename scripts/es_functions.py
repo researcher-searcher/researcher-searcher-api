@@ -128,11 +128,11 @@ def mean_vector_query(
         return []
 
 
-def standard_query(index_name, text):
+def standard_query(index_name, text, year_range):
     body = {
         "size": 100,
         "query": {"match": {"sent_text": {"query": text}}},
-        "_source": ["doc_id", "sent_num", "sent_text"],
+        "_source": ["doc_id", "sent_num", "sent_text", "year"],
         "indices_boost": [
             {"title_sentence_vectors": TITLE_WEIGHT},
             {"abstract_sentence_vectors": ABSTRACT_WEIGHT},
