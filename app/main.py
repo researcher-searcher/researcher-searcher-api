@@ -1,7 +1,7 @@
 from typing import Optional
 from fastapi import Depends, FastAPI, Query
 from fastapi.openapi.utils import get_openapi
-from fastapi.security import OAuth2PasswordBearer
+#from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
 from scripts.general import load_spacy_model, neo4j_connect
 from scripts.search import (
@@ -16,7 +16,7 @@ from scripts.search import (
 from enum import Enum
 
 app = FastAPI(docs_url="/")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+#oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # globals
 nlp = load_spacy_model()
