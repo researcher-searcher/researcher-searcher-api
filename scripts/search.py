@@ -95,7 +95,7 @@ def convert_df_to_wa(results_df, person_df, doc_col):
     m = results_df.merge(person_df, left_on=doc_col, right_on="output_id")
     m.drop([doc_col], axis=1, inplace=True)
     # m['weight']=range(m.shape[0],0,-1)
-    df_group = m.groupby(by=["person_id", "person_name", "email"])
+    df_group = m.groupby(by=["person_id", "person_name", "person_email"])
     wa = df_group.apply(weighted_average)
     df = df_group.size().reset_index(name="count")
     logger.info(df.head())
