@@ -66,7 +66,7 @@ def output_to_people(output_list: list):
         WHERE
             o.id in {output_list} 
         AND
-            o.type in ['academicschool','academicdepartment'] 
+            org.type in ['academicschool','academicdepartment'] 
         RETURN 
             p.name as person_name,p.url as person_id, o.id as output_id, collect(org.name) as org;
     """.format(
@@ -299,7 +299,7 @@ def get_collab(person: str, method: str):
             WHERE 
                 p1._id = '{person}'
             AND
-                o.type in ['academicschool','academicdepartment'] 
+                org.type in ['academicschool','academicdepartment'] 
             WITH
                 p1,pp,p2,org
             ORDER 
@@ -326,7 +326,7 @@ def get_collab(person: str, method: str):
             WHERE 
                 p1._id = '{person}'
             AND
-                o.type in ['academicschool','academicdepartment'] 
+                org.type in ['academicschool','academicdepartment'] 
             WITH
                 p1,pp,p2,org
             ORDER 
@@ -351,7 +351,7 @@ def get_collab(person: str, method: str):
             MATCH 
                 (p1:Person)-[pp:PERSON_PERSON]-(p2)-[r:PERSON_ORG]-(org:Org)
             AND
-                o.type in ['academicschool','academicdepartment'] 
+                org.type in ['academicschool','academicdepartment'] 
             WHERE 
                 p1._id = '{person}'
             RETURN
