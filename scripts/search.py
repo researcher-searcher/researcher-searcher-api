@@ -311,7 +311,7 @@ def get_collab(person: str, method: str):
             LIMIT
                 {limit}
         """.format(
-            person=person
+            person=person,limit=limit
         )
     elif method == "yes":
         query = """
@@ -336,7 +336,7 @@ def get_collab(person: str, method: str):
             LIMIT
                 {limit}
         """.format(
-            person=person
+            person=person,limit=limit
         )
     else:
         query = """
