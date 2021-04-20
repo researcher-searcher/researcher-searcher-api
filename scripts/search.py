@@ -287,6 +287,7 @@ def get_person(text: str, method: str = "fuzzy"):
 def get_collab(person: str, method: str):
     logger.info(f"get_collab {person} {method}")
     person = person.strip().lower()
+    limit=100
     if method == "no":
         query = """
             MATCH 
@@ -308,7 +309,7 @@ def get_collab(person: str, method: str):
             ORDER
                 by score desc 
             LIMIT
-                10
+                {limit}
         """.format(
             person=person
         )
@@ -333,7 +334,7 @@ def get_collab(person: str, method: str):
             ORDER
                 by score desc 
             LIMIT
-                10
+                {limit}
         """.format(
             person=person
         )
@@ -348,9 +349,9 @@ def get_collab(person: str, method: str):
             ORDER 
                 by score desc 
             LIMIT
-                10
+                {limit}
         """.format(
-            person=person
+            person=person,limit=limit
         )
     logger.info(query)
     data = session.run(query).data()
