@@ -68,7 +68,7 @@ def output_to_people(output_list: list):
         AND
             org.type in ['academicschool','academicdepartment'] 
         RETURN 
-            p.name as person_name,p.url as person_id, o.id as output_id, collect(org.name) as org;
+            p.name as person_name, p.email as person_email, p.url as person_id, o.id as output_id, collect(org.name) as org;
     """.format(
         output_list=output_list
     )
@@ -311,7 +311,7 @@ def get_collab(person: str, method: str):
             WHERE 
                 not (p1)-[:PERSON_OUTPUT]-(:Output)-[:PERSON_OUTPUT]-(p2) 
             RETURN
-                p2.name as name,p2.url as url, collect(org.name) as org, pp.score as score
+                p2.name as name, p2.email as email, p2.url as url, collect(org.name) as org, pp.score as score
             ORDER
                 by score desc 
             LIMIT
@@ -338,7 +338,7 @@ def get_collab(person: str, method: str):
             WHERE 
                 (p1)-[:PERSON_OUTPUT]-(:Output)-[:PERSON_OUTPUT]-(p2) 
             RETURN
-                p2.name as name,p2.url as url, collect(org.name) as org, pp.score as score 
+                p2.name as name, p2.email as email, p2.url as url, collect(org.name) as org, pp.score as score 
             ORDER
                 by score desc 
             LIMIT
@@ -355,7 +355,7 @@ def get_collab(person: str, method: str):
             WHERE 
                 p1._id = '{person}'
             RETURN
-                p2.name as name,p2.url as url, collect(org.name) as org, pp.score as score 
+                p2.name as name, p2.email as email, p2.url as url, collect(org.name) as org, pp.score as score 
             ORDER 
                 by score desc 
             LIMIT
