@@ -12,6 +12,7 @@ from scripts.search import (
     es_person_vec,
     es_output_vec,
     get_person,
+    get_vec,
 )
 from enum import Enum
 
@@ -37,6 +38,10 @@ class CollabFilter(str, Enum):
     y = "yes"
     n = "no"
     a = "all"
+
+class SplitMethod(str, Enum):
+    sent = "sent"
+    all = "all"
 
 
 @app.get(
@@ -141,6 +146,23 @@ async def run_collab(
     data = get_collab(query, method)
     return {"query": query, "method": method, "res": data}
 
+@app.get(
+    "/vector/",
+    description=("Create a vector representation for a piece of text"),
+    tags=["search"],
+)
+async def run_vector(
+    query: str = Query(
+        ..., title="Vector Query", description="the text to use for the search query"
+    ),
+    method: SplitMethod = Query(
+        SplitMethod.sent,
+        title="Split on sentence or whole text",
+        description="create a vector for each sentence (sent) or for the whole text (all)",
+    ),
+):
+    data = get_vec(nlp=nlp,text=query,method=method)
+    return {"query": query, "method":method, "res": data}
 
 # customise the swagger interface
 def custom_openapi():

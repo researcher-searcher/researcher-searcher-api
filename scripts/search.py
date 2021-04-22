@@ -196,6 +196,36 @@ def es_vec(nlp, text: str, year_range: list):
     else:
         return []
 
+def get_vec(nlp,text:str,method:str):
+    doc = nlp(text)
+    logger.info(f"get_vec {text} {method}")
+    results = []
+    q_sent_num = 0
+
+    if method == 'sent':
+        for sent in doc.sents:
+            # check if sentence is suitable
+            if len(sent.text.strip())<3:
+                continue
+            logger.info(f"##### {q_sent_num} {sent} {len(sent.text.strip())} ######")
+            # vectors
+            vec = sent.vector
+            results.append({
+                'q_sent_num':q_sent_num,
+                'q_sent_text':sent.text,
+                'vector':vec.tolist()
+            })
+            q_sent_num += 1
+    else:
+        vec = doc.vector
+        results.append({
+                'q_sent_num':q_sent_num,
+                'q_sent_text':sent.text,
+                'vector':vec.tolist()
+            })
+    #logger.info(results)
+    return results
+
 
 def es_person_vec(nlp, text: str):
     doc = nlp(text)
