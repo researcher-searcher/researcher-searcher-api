@@ -220,7 +220,7 @@ def get_vec(nlp,text:str,method:str):
         vec = doc.vector
         results.append({
                 'q_sent_num':q_sent_num,
-                'q_sent_text':sent.text,
+                'q_sent_text':text,
                 'vector':vec.tolist()
             })
     #logger.info(results)

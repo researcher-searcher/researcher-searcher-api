@@ -13,14 +13,14 @@ client = TestClient(app)
 def test_search_full():
     response = client.get("/search/?query=test&method=full")
     assert response.status_code == 200
-    assert list(response.json().keys()) == ["query", "method", "res"]
+    assert list(response.json().keys()) == ["query", "method", "year_range", "res"]
     assert len(response.json()["res"]) > 10
 
 
 def test_search_vec():
     response = client.get("/search/?query=test&method=vec")
     assert response.status_code == 200
-    assert list(response.json().keys()) == ["query", "method", "res"]
+    assert list(response.json().keys()) == ["query", "method", "year_range", "res"]
     assert len(response.json()["res"]) > 10
 
 
@@ -50,3 +50,9 @@ def test_collab():
     assert response.status_code == 200
     assert list(response.json().keys()) == ["query", "method", "res"]
     assert len(response.json()["res"]) > 2
+
+def test_vector():
+    response = client.get("/vector/?query=test&method=sent")
+    assert response.status_code == 200
+    assert list(response.json().keys()) == ["query", "method", "res"]
+    assert len(response.json()["res"]) == 1
