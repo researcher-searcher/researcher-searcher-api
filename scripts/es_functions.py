@@ -203,8 +203,7 @@ def combine_full_and_vector(index_name:str, query_text:str, query_vector:list, r
                                 "query": query_text,     
                                 #"boost" : 10
                             },                            
-                        },
-                         
+                        },    
                     },
                     {
                         "script_score": {

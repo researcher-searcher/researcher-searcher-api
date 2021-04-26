@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import json
+import math
 import collections
 from scripts.es_functions import (
     vector_query,
@@ -81,16 +82,17 @@ def output_to_people(output_list: list):
 
 
 # if no restriction on top number, people who have lots of hits get penalised for those hits with lower scores
-def weighted_average(data, top=5):
+def weighted_average(data, top=10):
     # logger.info(data['person_name'])
     weights = list(data["weight"][:top])
     scores = list(data["score"][:top])
     weighted_avg = round(np.average(scores, weights=weights), 3)
     logger.info(weighted_avg)
 
-    # divide by reciprocal of sentence hits
-    weighted_avg = weighted_average / (1/len(weights))
-    logger.info(f'{weighted_avg} {1/len(weights)}')
+    # factor in the number of sentence hits
+    #weighted_avg = weighted_avg * math.sqrt(len(weights))
+    #weighted_avg = weighted_avg * len(weights)**(1./3.)
+    #logger.info(f'{weighted_avg} {len(weights)**(1./3.)}')
     
     # weighted_avg = round(np.average( scores),3)
     # logger.info(f'weights {weights} scores {scores} wa {weighted_avg}')

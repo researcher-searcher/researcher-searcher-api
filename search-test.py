@@ -9,10 +9,13 @@ import os
 query = 'genome wide association studies'
 query = 'Systematic reviews of genetic association'
 query = 'what are the risk factors for breast cancer?'
+#query = 'epigraphdb'
+query = 'epigenetics'
+query = 'machine learning'
 
 vector_index_name = "use_*_sentence_vectors"
 
-f = query.replace(' ','_')+'.npy'
+f = f"output/{query.replace(' ','_')}.npy"
 if os.path.exists(f):
     logger.info(f'{f} done')
     test_vec = np.load(f)
