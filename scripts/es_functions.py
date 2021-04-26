@@ -22,7 +22,7 @@ es = Elasticsearch(
 )
 
 TITLE_WEIGHT = 1
-ABSTRACT_WEIGHT = 0.95
+ABSTRACT_WEIGHT = 1
 
 def vector_query(
     index_name:str, query_vector:list, record_size:int=100000, search_size:int=100, score_min:int=0, year_range:list=[1950,2021]

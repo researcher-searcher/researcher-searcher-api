@@ -7,6 +7,7 @@ from scripts.es_functions import (
     standard_query,
     mean_vector_query,
     filter_query,
+    combine_full_and_vector
 )
 from scripts.general import neo4j_connect
 from loguru import logger
@@ -85,6 +86,12 @@ def weighted_average(data, top=5):
     weights = list(data["weight"][:top])
     scores = list(data["score"][:top])
     weighted_avg = round(np.average(scores, weights=weights), 3)
+    logger.info(weighted_avg)
+
+    # divide by reciprocal of sentence hits
+    weighted_avg = weighted_average / (1/len(weights))
+    logger.info(f'{weighted_avg} {1/len(weights)}')
+    
     # weighted_avg = round(np.average( scores),3)
     # logger.info(f'weights {weights} scores {scores} wa {weighted_avg}')
     return weighted_avg
@@ -124,6 +131,42 @@ def convert_df_to_wa(results_df, person_df, doc_col):
     df.sort_values(by="wa", ascending=False, inplace=True)
     return df
 
+# standard match against sentence text
+def es_vec_sent(nlp, text: str, year_range: list):
+    logger.info(f"Running es_sent with {text}")
+    doc = nlp(text)
+    q_sent_num = 0
+    results = []
+    output_list = []
+    for sent in doc.sents:
+        # check if sentence is suitable
+        if len(sent.text.strip())<3:
+            continue
+        logger.info(f"##### {q_sent_num} {sent.text} ######")
+        res = combine_full_and_vector(index_name=vector_index_name, query_vector=sent.vector, query_text=sent.text, year_range=year_range)
+        # logger.info(res)
+        if res:
+            weight = len(res["hits"]["hits"])
+            for r in res["hits"]["hits"]:
+                rr = r["_source"]
+                rr["index"] = r["_index"]
+                rr["score"] = r["_score"]
+                rr["q_sent_num"] = q_sent_num
+                rr["q_sent_text"] = sent.text
+                # square the weight to improve results for large number of hits
+                rr["weight"] = weight * weight
+                results.append(rr)
+                output_list.append(r["_source"]["doc_id"])
+                weight -= 1
+        q_sent_num += 1
+    if len(output_list) > 0:
+        logger.info(len(output_list))
+        op = output_to_people(list(set(output_list)))
+        es_df = pd.DataFrame(results)
+        df = convert_df_to_wa(es_df, op, "doc_id")
+        return df.to_dict("records")
+    else:
+        return []
 
 # standard match against sentence text
 def es_sent(nlp, text: str, year_range: list):
@@ -286,7 +329,7 @@ def es_output_vec(nlp, text: str):
             return []
 
 
-def get_person(text: str, method: str = "fuzzy"):
+def get_person_info(text: str, method: str = "fuzzy"):
     logger.info(f"get_person {text} {method}")
     if method == "fuzzy":
         query = """

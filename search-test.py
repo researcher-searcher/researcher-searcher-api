@@ -8,7 +8,8 @@ import os
 
 query = 'genome wide association studies'
 query = 'Systematic reviews of genetic association'
-query = 'machine learning'
+query = 'what are the risk factors for breast cancer?'
+
 vector_index_name = "use_*_sentence_vectors"
 
 f = query.replace(' ','_')+'.npy'
@@ -26,6 +27,8 @@ else:
 logger.info(len(test_vec))
 
 top = 10
+
+logger.info('### COMBINED')
 res1 = combine_full_and_vector(index_name = vector_index_name, query_text=query, query_vector=test_vec)
 d = []
 for r in res1["hits"]["hits"][0:top]:
@@ -34,8 +37,9 @@ for r in res1["hits"]["hits"][0:top]:
     rr['score'] = r['_score']
     d.append(rr)
 df1 = pd.DataFrame(d)
-logger.info(f'COMBINED\n{df1[["index","sent_text","score"]]}')
+logger.info(f'\n{df1[["index","sent_text","score"]]}')
 
+logger.info('### FULL TEXT')
 res2 = standard_query(index_name=vector_index_name,text=query) 
 d = []
 for r in res2["hits"]["hits"][0:top]:
@@ -44,8 +48,12 @@ for r in res2["hits"]["hits"][0:top]:
     rr['index'] = r['_index']
     d.append(rr)
 df2 = pd.DataFrame(d)
-logger.info(f'FULL TEXT\n{df2[["index","sent_text","score"]]}')
+try:
+    logger.info(f'\n{df2[["index","sent_text","score"]]}')
+except:
+    logger.info('No data')
 
+logger.info('### VECTOR')
 res3 = vector_query(index_name=vector_index_name,query_vector=test_vec)
 df3 = pd.DataFrame(res3[0:top])
-logger.info(f'VECTOR\n{df3[["index","sent_text","score"]]}')
+logger.info(f'\n{df3[["index","sent_text","score"]]}')

@@ -13,6 +13,7 @@ from scripts.search import (
     es_output_vec,
     get_person,
     get_vec,
+    es_vec_sent
 )
 from enum import Enum
 
@@ -28,6 +29,7 @@ nlp = load_spacy_model()
 
 
 class SearchMethods(str, Enum):
+    c = "combine"
     f = "full"
     v = "vec"
     p = "person"
@@ -48,6 +50,7 @@ class SplitMethod(str, Enum):
     "/search/",
     description=(
         "Search via a number of methods\n"
+        "- for a person, using vector embedding and sentence text (combine)\n"
         "- for a person, using sentence text (full)\n"
         "- for a person, using vector embedding of sentences (vec)\n"
         "- for a person, using mean vector (person)\n"
@@ -64,7 +67,7 @@ async def run_search(
         max_length=10000,
     ),
     method: SearchMethods = Query(
-        SearchMethods.f,
+        SearchMethods.c,
         title="Search Method",
         description="the method to use for the search query (full, vec, person or output)",
     ),
@@ -83,6 +86,9 @@ async def run_search(
     # token: str = Depends(oauth2_scheme)
 ):
     # standard match against query sentences
+    if method == "combine":
+        res = es_vec_sent(nlp=nlp, text=query, year_range=[year_min, year_max])
+        return {"query": query, "method": method, 'year_range':[year_min,year_max], "res": res}
     if method == "full":
         res = es_sent(nlp=nlp, text=query, year_range=[year_min, year_max])
         return {"query": query, "method": method, 'year_range':[year_min,year_max], "res": res}
