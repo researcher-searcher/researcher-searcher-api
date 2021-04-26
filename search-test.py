@@ -23,3 +23,5 @@ else:
 logger.info(len(test_vec))
 
 res = combine_full_and_vector(index_name = vector_index_name, query_text=query, query_vector=test_vec)
+for r in res["hits"]["hits"][0:5]:
+    logger.info(r)

@@ -192,3 +192,39 @@ def filter_query(index_name:str, filterData:str):
 def combine_full_and_vector(index_name:str, query_text:str, query_vector:list, record_size:int=100000, search_size:int=100, score_min:int=0, year_range:list=[1950,2021]
 ):
     logger.info(query_text)
+    body = {
+        "size": 100,
+        "query": {
+            "bool": {
+                "should": [
+                    #{
+                    #    "match": {
+                    #        "sent_text": {
+                    #            "query": query_text     
+                    #        }
+                    #    }
+                    #},
+                    {
+                        "script_score": {
+                            "query" : {"match_all" : {}},
+                            "script":{
+                                # +1 to deal with negative results (script score function must not produce negative scores)
+                                "source": "10 * cosineSimilarity(params.query_vector, 'sent_vector') +1",
+                                "params": {"query_vector": query_vector},
+                            },
+                            "boost" : 100
+                        },
+                    },        
+                ],
+            }
+        },
+        "_source": ["doc_id", "sent_num", "sent_text", "year"],
+        #"indices_boost": [
+        #    {"title_sentence_vectors": TITLE_WEIGHT},
+        #    {"abstract_sentence_vectors": ABSTRACT_WEIGHT},
+        #],
+    }
+    res = es.search(
+        ignore_unavailable=True, request_timeout=TIMEOUT, index=index_name, body=body
+    )
+    return res
