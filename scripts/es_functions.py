@@ -187,3 +187,8 @@ def filter_query(index_name:str, filterData:str):
         ignore_unavailable=True, request_timeout=TIMEOUT, index=index_name, body=body
     )
     return res
+
+# https://discuss.elastic.co/t/use-distance-on-dense-vectors-in-relevance-score-at-query-time/217012/2
+def combine_full_and_vector(index_name:str, query_text:str, query_vector:list, record_size:int=100000, search_size:int=100, score_min:int=0, year_range:list=[1950,2021]
+):
+    logger.info(query_text)
