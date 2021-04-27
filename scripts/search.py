@@ -82,7 +82,8 @@ def output_to_people(output_list: list):
 
 
 # if no restriction on top number, people who have lots of hits get penalised for those hits with lower scores
-def weighted_average(data, top=10):
+# to just use top hit, set top to 1
+def weighted_average(data, top=5):
     # logger.info(data['person_name'])
     weights = list(data["weight"][:top])
     scores = list(data["score"][:top])
