@@ -13,9 +13,9 @@ from scripts.es_functions import (
 from scripts.general import neo4j_connect
 from loguru import logger
 
-vector_index_name = "use_*_sentence_vectors"
-person_index_name = "use_person_vectors"
-output_index_name = "use_output_vectors"
+vector_index_name = "use_*_sentence_vectors_filter"
+person_index_name = "use_person_vectors_filter"
+output_index_name = "use_output_vectors_filter"
 
 session = neo4j_connect()
 
@@ -87,11 +87,11 @@ def weighted_average(data, top=10):
     weights = list(data["weight"][:top])
     scores = list(data["score"][:top])
     weighted_avg = round(np.average(scores, weights=weights), 3)
-    logger.info(weighted_avg)
+    #logger.info(weighted_avg)
 
     # factor in the number of sentence hits
     #weighted_avg = weighted_avg * math.sqrt(len(weights))
-    #weighted_avg = weighted_avg * len(weights)**(1./3.)
+    weighted_avg = weighted_avg * len(weights)**(1./3.)
     #logger.info(f'{weighted_avg} {len(weights)**(1./3.)}')
     
     # weighted_avg = round(np.average( scores),3)
@@ -156,7 +156,7 @@ def es_vec_sent(nlp, text: str, year_range: list):
                 rr["q_sent_num"] = q_sent_num
                 rr["q_sent_text"] = sent.text
                 # square the weight to improve results for large number of hits
-                rr["weight"] = weight * weight
+                rr["weight"] = weight
                 results.append(rr)
                 output_list.append(r["_source"]["doc_id"])
                 weight -= 1
@@ -166,6 +166,7 @@ def es_vec_sent(nlp, text: str, year_range: list):
         op = output_to_people(list(set(output_list)))
         es_df = pd.DataFrame(results)
         df = convert_df_to_wa(es_df, op, "doc_id")
+        logger.info(f"\n{df.head(n=20)[['person_name','count','wa']]}")
         return df.to_dict("records")
     else:
         return []
@@ -228,7 +229,7 @@ def es_vec(nlp, text: str, year_range: list):
                 r["q_sent_num"] = q_sent_num
                 r["q_sent_text"] = sent.text
                 # square the weight to improve results for large number of hits
-                r["weight"] = weight * weight
+                r["weight"] = weight
                 results.append(r)
                 output_list.append(r["url"])
                 weight -= 1

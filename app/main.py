@@ -72,7 +72,7 @@ async def run_search(
         description="the method to use for the search query (full, vec, person or output)",
     ),
     year_min: int = Query(
-        1950,
+        2000,
         title="Minimum year",
         description="minimum year of output",
         ge=1950

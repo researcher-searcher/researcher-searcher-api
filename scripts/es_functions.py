@@ -23,9 +23,10 @@ es = Elasticsearch(
 
 TITLE_WEIGHT = 1
 ABSTRACT_WEIGHT = 1
+ES_HIT_LIMIT = 100
 
 def vector_query(
-    index_name:str, query_vector:list, record_size:int=100000, search_size:int=100, score_min:int=0, year_range:list=[1950,2021]
+    index_name:str, query_vector:list, record_size:int=100000, search_size:int=ES_HIT_LIMIT, score_min:int=0, year_range:list=[1950,2021]
 ):
     script_query = {
         "script_score": {
@@ -94,7 +95,7 @@ def vector_query(
 
 
 def mean_vector_query(
-    index_name:str, query_vector:list, record_size:int=100000, search_size:int=100, score_min:int=0
+    index_name:str, query_vector:list, record_size:int=100000, search_size:int=ES_HIT_LIMIT, score_min:int=0
 ):
     logger.debug(f"mean_vector_query {index_name}")
     script_query = {
@@ -144,7 +145,7 @@ def mean_vector_query(
 
 def standard_query(index_name:str, text:str, year_range:list=[1950,2021]):
     body = {
-        "size": 100,
+        "size": ES_HIT_LIMIT,
         "query": {
             "bool" : {
             "must" : [{
@@ -179,7 +180,7 @@ def standard_query(index_name:str, text:str, year_range:list=[1950,2021]):
 def filter_query(index_name:str, filterData:str):
     body = {
         # "from":from_val,
-        "size": 10000,
+        "size": ES_HIT_LIMIT,
         "query": {"bool": {"filter": filterData}},
     }
 
@@ -193,24 +194,45 @@ def combine_full_and_vector(index_name:str, query_text:str, query_vector:list, r
 ):
     logger.info(query_text)
     body = {
-        "size": 100,
+        "size": ES_HIT_LIMIT,
         "query": {
             "bool": {
                 "should": [
                     {
-                        "match": {
-                            "sent_text": {
-                                "query": query_text,     
-                                #"boost" : 10
-                            },                            
-                        },    
+                    "bool" : {
+                        "must" : [
+                            {
+                            "match": {
+                                "sent_text": {
+                                    "query": query_text,     
+                                    #"boost" : 10
+                                },                            
+                            }
+                        },
+                        {   
+                            "range": {
+                                "year": {
+                                    "from": year_range[0],
+                                    "to": year_range[1]
+                                }
+                            }
+                            }]
+                        }
                     },
                     {
                         "script_score": {
-                            "query" : {"match_all" : {}},
+                            #"query" : {"match_all" : {}},
+                            "query" : {
+                                "range": {
+                                "year": {
+                                    "from": year_range[0],
+                                    "to": year_range[1]
+                                }
+                            }
+                            },
                             "script":{
                                 # +1 to deal with negative results (script score function must not produce negative scores)
-                                "source": "50 * cosineSimilarity(params.query_vector, 'sent_vector') +1",
+                                "source": "30 * cosineSimilarity(params.query_vector, 'sent_vector') +1",
                                 "params": {"query_vector": query_vector},
                             },
                             #"boost" : 100
