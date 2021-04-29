@@ -87,12 +87,12 @@ def weighted_average(data, top=5):
     # logger.info(data['person_name'])
     weights = list(data["weight"][:top])
     scores = list(data["score"][:top])
-    weighted_avg = round(np.average(scores, weights=weights), 3)
+    weighted_avg = np.average(scores, weights=weights)
     #logger.info(weighted_avg)
 
     # factor in the number of sentence hits
     #weighted_avg = weighted_avg * math.sqrt(len(weights))
-    weighted_avg = weighted_avg * len(weights)**(1./3.)
+    weighted_avg = round(weighted_avg * len(weights)**(1./3.),3)
     #logger.info(f'{weighted_avg} {len(weights)**(1./3.)}')
     
     # weighted_avg = round(np.average( scores),3)
