@@ -222,6 +222,7 @@ def es_vec(nlp, text: str, year_range: list):
         # vectors
         sent_vec = sent.vector
         res = vector_query(index_name=vector_index_name, query_vector=sent_vec, year_range=year_range)
+        #logger.info(res)
         if res:
             logger.info(res[0])
             weight = len(res)
@@ -443,7 +444,7 @@ def get_collab(person: str, method: str):
     logger.info(query)
     data = session.run(query).data()
     df = pd.json_normalize(data).to_dict("records")
-    logger.info(f"\n{df}")
+    #logger.info(f"\n{df}")
     return df
 
 
