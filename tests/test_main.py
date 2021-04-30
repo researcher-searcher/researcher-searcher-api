@@ -9,6 +9,11 @@ client = TestClient(app)
 #    assert response.status_code == 200
 #    assert response.json() == ["Researcher Searcher"]
 
+def test_search_combine():
+    response = client.get("/search/?query=test&method=combine")
+    assert response.status_code == 200
+    assert list(response.json().keys()) == ["query", "method", "year_range", "res"]
+    assert len(response.json()["res"]) > 10
 
 def test_search_full():
     response = client.get("/search/?query=test&method=full")
@@ -45,8 +50,20 @@ def test_person():
     assert len(response.json()["res"]) > 1
 
 
-def test_collab():
+def test_collab1():
     response = client.get("/collab/?query=ben.elsworth@bristol.ac.uk&method=no")
+    assert response.status_code == 200
+    assert list(response.json().keys()) == ["query", "method", "res"]
+    assert len(response.json()["res"]) > 2
+
+def test_collab2():
+    response = client.get("/collab/?query=ben.elsworth@bristol.ac.uk&method=yes")
+    assert response.status_code == 200
+    assert list(response.json().keys()) == ["query", "method", "res"]
+    assert len(response.json()["res"]) > 2
+
+def test_collab3():
+    response = client.get("/collab/?query=ben.elsworth@bristol.ac.uk&method=all")
     assert response.status_code == 200
     assert list(response.json().keys()) == ["query", "method", "res"]
     assert len(response.json()["res"]) > 2

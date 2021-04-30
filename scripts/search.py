@@ -428,9 +428,9 @@ def get_collab(person: str, method: str):
         query = """
             MATCH 
                 (p1:Person)-[pp:PERSON_PERSON]-(p2)-[r:PERSON_ORG]-(org:Org)
-            AND
+            WHERE
                 org.type in ['academicschool','academicdepartment'] 
-            WHERE 
+            AND 
                 p1._id = '{person}'
             RETURN
                 p2.name as name, p2.email as email, p2.url as url, collect(org.name) as org, pp.score as score 
