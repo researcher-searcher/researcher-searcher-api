@@ -472,5 +472,6 @@ def get_person(person: str, limit: int):
 
 def get_person_aaa(query:list):
     res = aaa_person(person_list=query)
-    #logger.info(res)
+    logger.info(res)
+    return res.to_dict("records")
 

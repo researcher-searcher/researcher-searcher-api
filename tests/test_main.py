@@ -21,13 +21,11 @@ def test_search_full():
     assert list(response.json().keys()) == ["query", "method", "year_range", "res"]
     assert len(response.json()["res"]) > 10
 
-
 def test_search_vec():
     response = client.get("/search/?query=test&method=vec")
     assert response.status_code == 200
     assert list(response.json().keys()) == ["query", "method", "year_range", "res"]
     assert len(response.json()["res"]) > 10
-
 
 def test_search_person():
     response = client.get("/search/?query=test&method=person")
@@ -35,20 +33,17 @@ def test_search_person():
     assert list(response.json().keys()) == ["query", "method", "res"]
     assert len(response.json()["res"]) > 10
 
-
 def test_search_output():
     response = client.get("/search/?query=test&method=output")
     assert response.status_code == 200
     assert list(response.json().keys()) == ["query", "method", "res"]
     assert len(response.json()["res"]) > 10
 
-
 def test_person():
     response = client.get("/person/?query=ben.elsworth@bristol.ac.uk")
     assert response.status_code == 200
     assert list(response.json().keys()) == ["query", "res"]
     assert len(response.json()["res"]) > 1
-
 
 def test_collab1():
     response = client.get("/collab/?query=ben.elsworth@bristol.ac.uk&method=no")
@@ -73,3 +68,9 @@ def test_vector():
     assert response.status_code == 200
     assert list(response.json().keys()) == ["query", "method", "res"]
     assert len(response.json()["res"]) == 1
+
+def test_person_aaa():
+    response = client.get("/aaa/?query=ben.elsworth%40bristol.ac.uk&query=tom.gaunt%40bristol.ac.uk&query=josine.min%40bristol.ac.uk&query=andrew.dowsey%40bristol.ac.uk")
+    assert response.status_code == 200
+    assert list(response.json().keys()) == ["query", "res"]
+    assert len(response.json()["res"]) == 16
