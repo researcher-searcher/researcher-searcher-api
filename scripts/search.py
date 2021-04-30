@@ -8,7 +8,8 @@ from scripts.es_functions import (
     standard_query,
     mean_vector_query,
     filter_query,
-    combine_full_and_vector
+    combine_full_and_vector,
+    aaa_person
 )
 from scripts.general import neo4j_connect
 from loguru import logger
@@ -468,4 +469,8 @@ def get_person(person: str, limit: int):
         return data
     else:
         return []
+
+def get_person_aaa(query:list):
+    res = aaa_person(person_list=query)
+    #logger.info(res)
 

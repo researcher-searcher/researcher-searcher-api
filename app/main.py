@@ -13,7 +13,8 @@ from scripts.search import (
     es_output_vec,
     get_person,
     get_vec,
-    es_vec_sent
+    es_vec_sent,
+    get_person_aaa
 )
 from enum import Enum
 
@@ -169,6 +170,19 @@ async def run_vector(
 ):
     data = get_vec(nlp=nlp,text=query,method=method)
     return {"query": query, "method":method, "res": data}
+
+@app.get(
+    "/aaa/",
+    description=("Return all against all distance calculations for list of people"),
+    tags=["search"],
+)
+async def run_person_aaa(
+    query: list = Query(
+        ..., title="Person list", description="list of people IDs"
+    )
+):
+    data = get_person_aaa(query=query)
+    return {"query": query, "res": data}
 
 # customise the swagger interface
 def custom_openapi():

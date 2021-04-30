@@ -267,7 +267,7 @@ def aaa_person(person_list:list):
         "size": ES_HIT_LIMIT,
         "query": {
             "bool": {
-                "filter": [{"terms":{"doc_id":p}}]
+                "filter": [{"terms":{"doc_id":person_list}}]
             }
         },
         "_source": ["doc_id", "vector"],
@@ -297,13 +297,4 @@ def aaa_person(person_list:list):
             aaa_data.append({'p1':key1,'p2':key2,'score':1-pws[i][j]})
     df = pd.DataFrame(aaa_data)
     logger.info(df)
-    return res
-
-p = [
-        'ben.elsworth@bristol.ac.uk',
-        'tom.gaunt@bristol.ac.uk',
-        'd.a.hughes@bristol.ac.uk',
-        'josine.min@bristol.ac.uk',
-        'andrew.dowsey@bristol.ac.uk'
-        ]
-aaa_person(person_list=p)
+    return df
