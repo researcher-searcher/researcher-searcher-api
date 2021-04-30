@@ -45,3 +45,12 @@ def neo4j_connect():
     )
     session = driver.session()
     return session
+
+def create_aaa_distances(vectors=[]):
+    logger.info(f'Creating distances {len(vectors)}')
+    data = np.array(vectors)
+    pws = distance.pdist(data, metric='cosine')
+    #return as square-form distance matrix
+    pws = distance.squareform(pws)
+    logger.info(len(pws))
+    return pws

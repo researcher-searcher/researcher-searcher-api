@@ -6,6 +6,7 @@ import numpy as np
 import time
 import pandas as pd
 from environs import Env
+from scripts.general import create_aaa_distances
 
 env = Env()
 env.read_env()
@@ -24,6 +25,11 @@ es = Elasticsearch(
 TITLE_WEIGHT = 1
 ABSTRACT_WEIGHT = 1
 ES_HIT_LIMIT = 100
+
+PERSON_INDEX = 'use_person_vectors_filter'
+OUTPUT_TITLE_INDEX = 'use_title_sentence_vectors_filter'
+OUTPUT_ABSTRACT_INDEX = 'use_abstract_sentence_vectors_filter'
+
 
 def vector_query(
     index_name:str, query_vector:list, record_size:int=100000, search_size:int=ES_HIT_LIMIT, score_min:int=0, year_range:list=[1950,2021]
@@ -61,8 +67,8 @@ def vector_query(
                 "query": script_query,
                 "_source": {"includes": ["doc_id", "year", "sent_num", "sent_text"]},
                 "indices_boost": [
-                    {"use_title_sentence_vectors_filter": TITLE_WEIGHT},
-                    {"use_abstract_sentence_vectors_filter": ABSTRACT_WEIGHT},
+                    {OUTPUT_TITLE_INDEX: TITLE_WEIGHT},
+                    {OUTPUT_ABSTRACT_INDEX: ABSTRACT_WEIGHT},
                 ],
             },
         )
@@ -168,8 +174,8 @@ def standard_query(index_name:str, text:str, year_range:list=[1950,2021]):
         },
         "_source": ["doc_id", "sent_num", "sent_text", "year"],
         "indices_boost": [
-            {"use_title_sentence_vectors_filter": TITLE_WEIGHT},
-            {"use_abstract_sentence_vectors_filter": ABSTRACT_WEIGHT},
+            {OUTPUT_TITLE_INDEX: TITLE_WEIGHT},
+            {OUTPUT_ABSTRACT_INDEX: ABSTRACT_WEIGHT},
         ],
     }
     res = es.search(
@@ -244,11 +250,60 @@ def combine_full_and_vector(index_name:str, query_text:str, query_vector:list, r
         },
         "_source": ["doc_id", "sent_num", "sent_text", "year"],
         "indices_boost": [
-            {"use_title_sentence_vectors_filter": TITLE_WEIGHT},
-            {"use_abstract_sentence_vectors_filter": ABSTRACT_WEIGHT},
+            {OUTPUT_TITLE_INDEX: TITLE_WEIGHT},
+            {OUTPUT_ABSTRACT_INDEX: ABSTRACT_WEIGHT},
         ],
     }
     res = es.search(
         ignore_unavailable=True, request_timeout=TIMEOUT, index=index_name, body=body
     )
     return res
+
+def aaa_person(person_list:list):
+    logger.info(person_list)
+
+    # get vectors for each person
+    body = {
+        "size": ES_HIT_LIMIT,
+        "query": {
+            "bool": {
+                "filter": [{"terms":{"doc_id":p}}]
+            }
+        },
+        "_source": ["doc_id", "vector"],
+    }
+    res = es.search(
+        ignore_unavailable=True, request_timeout=TIMEOUT, index=PERSON_INDEX, body=body
+    )
+    #logger.info(res)
+
+    # create dictionary of IDs and vectors
+    vector_data = {}
+    for r in res['hits']['hits']:
+        person_id = r['_source']['doc_id']
+        person_vector = r['_source']['vector']
+        vector_data[person_id] = person_vector
+    logger.info(len(vector_data))
+
+    # run aaa cosine
+    pws = create_aaa_distances(list(vector_data.values()))
+    logger.info(pws)
+
+    # create df of person-person and score
+    aaa_data=[]
+    for i,key1 in enumerate(vector_data):
+        for j,key2 in enumerate(vector_data):
+            #logger.info(f'{key1} {key2} {pws[i][j]}')
+            aaa_data.append({'p1':key1,'p2':key2,'score':1-pws[i][j]})
+    df = pd.DataFrame(aaa_data)
+    logger.info(df)
+    return res
+
+p = [
+        'ben.elsworth@bristol.ac.uk',
+        'tom.gaunt@bristol.ac.uk',
+        'd.a.hughes@bristol.ac.uk',
+        'josine.min@bristol.ac.uk',
+        'andrew.dowsey@bristol.ac.uk'
+        ]
+aaa_person(person_list=p)
