@@ -14,9 +14,9 @@ from scripts.es_functions import (
 from scripts.general import neo4j_connect
 from loguru import logger
 
-vector_index_name = "use_*_sentence_vectors_filter"
-person_index_name = "use_person_vectors_filter"
-output_index_name = "use_output_vectors_filter"
+vector_index_name = "use_*_sentence_vectors"
+person_index_name = "use_person_vectors"
+output_index_name = "use_output_vectors"
 
 session = neo4j_connect()
 
@@ -32,7 +32,7 @@ def person_info(id_list: list, node_property: str):
         AND
             o.type in ['academicschool','academicdepartment'] 
         RETURN 
-            p.name as name, p.url as url, p.email as email, collect(o.name) as org;
+            p.name as name, p.url as url, p.person_id as person_id, collect(o.name) as org;
     """.format(
         property=node_property, id_list=id_list
     )
@@ -71,7 +71,7 @@ def output_to_people(output_list: list):
         AND
             org.type in ['academicschool','academicdepartment'] 
         RETURN 
-            p.name as person_name, p.email as person_email, p.url as person_id, o.id as output_id, collect(org.name) as org;
+            p.name as person_name, p.person_id as person_id, o.id as output_id, collect(org.name) as org;
     """.format(
         output_list=output_list
     )
@@ -106,7 +106,7 @@ def convert_df_to_wa(results_df, person_df, doc_col):
     m = results_df.merge(person_df, left_on=doc_col, right_on="output_id")
     m.drop([doc_col], axis=1, inplace=True)
     # m['weight']=range(m.shape[0],0,-1)
-    df_group = m.groupby(by=["person_id", "person_name", "person_email"])
+    df_group = m.groupby(by=["person_id", "person_name"])
     wa = df_group.apply(weighted_average)
     df = df_group.size().reset_index(name="count")
     logger.info(df.head())
@@ -171,6 +171,7 @@ def es_vec_sent(nlp, text: str, year_range: list):
         logger.info(f"\n{df.head(n=20)[['person_name','count','wa']]}")
         return df.to_dict("records")
     else:
+        logger.info('no results')
         return []
 
 # standard match against sentence text
@@ -208,6 +209,7 @@ def es_sent(nlp, text: str, year_range: list):
         df = convert_df_to_wa(es_df, op, "doc_id")
         return df.to_dict("records")
     else:
+        logger.info('no results')
         return []
 
 def es_vec(nlp, text: str, year_range: list):
@@ -294,8 +296,8 @@ def es_person_vec(nlp, text: str):
             es_df = pd.DataFrame(results)
             logger.info("here")
             logger.info(es_df.head())
-            op = person_info(id_list=list(set(output_list)), node_property="email")
-            m = es_df.merge(op, left_on="doc_id", right_on="email")
+            op = person_info(id_list=list(set(output_list)), node_property="person_id")
+            m = es_df.merge(op, left_on="doc_id", right_on="person_id")
             m.drop(["doc_id"], axis=1, inplace=True)
             m.sort_values(by="score", ascending=False, inplace=True)
             logger.info(f"\n{m}")
@@ -390,7 +392,7 @@ def get_collab(person: str, method: str):
             WHERE 
                 not (p1)-[:PERSON_OUTPUT]-(:Output)-[:PERSON_OUTPUT]-(p2) 
             RETURN
-                p2.name as name, p2.email as email, p2.url as url, collect(org.name) as org, pp.score as score
+                p2.name as name, p2.person_id as person_id, p2.url as url, collect(org.name) as org, pp.score as score
             ORDER
                 by score desc 
             LIMIT
@@ -417,7 +419,7 @@ def get_collab(person: str, method: str):
             WHERE 
                 (p1)-[:PERSON_OUTPUT]-(:Output)-[:PERSON_OUTPUT]-(p2) 
             RETURN
-                p2.name as name, p2.email as email, p2.url as url, collect(org.name) as org, pp.score as score 
+                p2.name as name, p2.person_id as person_id, p2.url as url, collect(org.name) as org, pp.score as score 
             ORDER
                 by score desc 
             LIMIT
@@ -434,7 +436,7 @@ def get_collab(person: str, method: str):
             AND 
                 p1._id = '{person}'
             RETURN
-                p2.name as name, p2.email as email, p2.url as url, collect(org.name) as org, pp.score as score 
+                p2.name as name, p2.person_id as person_id, p2.url as url, collect(org.name) as org, pp.score as score 
             ORDER 
                 by score desc 
             LIMIT

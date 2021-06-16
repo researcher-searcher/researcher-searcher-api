@@ -178,6 +178,7 @@ def standard_query(index_name:str, text:str, year_range:list=[1950,2021]):
             {OUTPUT_ABSTRACT_INDEX: ABSTRACT_WEIGHT},
         ],
     }
+    logger.info(body)
     res = es.search(
         ignore_unavailable=True, request_timeout=TIMEOUT, index=index_name, body=body
     )
@@ -254,6 +255,7 @@ def combine_full_and_vector(index_name:str, query_text:str, query_vector:list, r
             {OUTPUT_ABSTRACT_INDEX: ABSTRACT_WEIGHT},
         ],
     }
+    #logger.info(body)
     res = es.search(
         ignore_unavailable=True, request_timeout=TIMEOUT, index=index_name, body=body
     )
