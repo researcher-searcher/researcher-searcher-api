@@ -116,7 +116,7 @@ async def run_search(
 )
 async def run_person(
     query: str = Query(
-        ..., title="Person Query", description="the email address of the person"
+        ..., title="Person Query", description="the id of the person"
     ),
     limit: int = Query(
         10,
@@ -141,7 +141,7 @@ async def run_collab(
     query: str = Query(
         ...,
         title="Collaboration recommender",
-        description="the email address of the person",
+        description="the id of the person",
     ),
     method: CollabFilter = Query(
         CollabFilter.y,

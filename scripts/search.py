@@ -376,7 +376,7 @@ def get_collab(person: str, method: str):
     if method == "no":
         query = """
             MATCH 
-                (p1:Person)-[pp:PERSON_PERSON]-(p2)-[r:PERSON_ORG]-(org:Org) 
+                (p1:Person)-[pp:PERSON_PERSON]-(p2:Person)-[r:PERSON_ORG]-(org:Org) 
             WHERE 
                 p1._id = '{person}'
             AND
@@ -403,7 +403,7 @@ def get_collab(person: str, method: str):
     elif method == "yes":
         query = """
             MATCH 
-                (p1:Person)-[pp:PERSON_PERSON]-(p2)-[r:PERSON_ORG]-(org:Org)  
+                (p1:Person)-[pp:PERSON_PERSON]-(p2:Person)-[r:PERSON_ORG]-(org:Org)  
             WHERE 
                 p1._id = '{person}'
             AND
@@ -430,7 +430,7 @@ def get_collab(person: str, method: str):
     else:
         query = """
             MATCH 
-                (p1:Person)-[pp:PERSON_PERSON]-(p2)-[r:PERSON_ORG]-(org:Org)
+                (p1:Person)-[pp:PERSON_PERSON]-(p2:Person)-[r:PERSON_ORG]-(org:Org)
             WHERE
                 org.type in ['academicschool','academicdepartment'] 
             AND 
