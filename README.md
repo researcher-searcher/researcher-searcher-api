@@ -1,7 +1,6 @@
 # researcher-searcher-api
-API for Researcher Searcher
 
-python -m spacy download en_core_web_lg
+API for Researcher Searcher
 
 ### local dev
 
@@ -9,9 +8,35 @@ https://pypi.org/project/fastapi/
 
 uvicorn app.main:app --reload
 
+pip install spacy-universal-sentence-encoder
+
 ### build
 
-docker-compose build
+Create image:
+
+`docker-compose build`
+
+Create .env file
+
+```
+GRAPH_HOST=
+GRAPH_USER=
+GRAPH_PASSWORD=
+GRAPH_HTTP_PORT=
+GRAPH_BOLT_PORT=
+
+ES_HOST=
+ES_PORT=
+ES_USER=
+ES_PASSWORD=
+
+API_PORT=
+NAME=
+```
+
+Create container
+
+`docker-compose up -d`
 
 ### todo
 
