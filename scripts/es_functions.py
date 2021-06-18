@@ -26,9 +26,9 @@ TITLE_WEIGHT = 1
 ABSTRACT_WEIGHT = 1
 ES_HIT_LIMIT = 100
 
-PERSON_INDEX = 'use_person_vectors_filter'
-OUTPUT_TITLE_INDEX = 'use_title_sentence_vectors_filter'
-OUTPUT_ABSTRACT_INDEX = 'use_abstract_sentence_vectors_filter'
+PERSON_INDEX = 'use_person_vectors'
+OUTPUT_TITLE_INDEX = 'use_title_sentence_vectors'
+OUTPUT_ABSTRACT_INDEX = 'use_abstract_sentence_vectors'
 
 
 def vector_query(

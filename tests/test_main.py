@@ -40,25 +40,25 @@ def test_search_output():
     assert len(response.json()["res"]) > 10
 
 def test_person():
-    response = client.get("/person/?query=ben.elsworth@bristol.ac.uk")
+    response = client.get("/person/?query=https://research-information.bris.ac.uk/en/persons/jean-golding")
     assert response.status_code == 200
     assert list(response.json().keys()) == ["query", "res"]
     assert len(response.json()["res"]) > 1
 
 def test_collab1():
-    response = client.get("/collab/?query=ben.elsworth@bristol.ac.uk&method=no")
+    response = client.get("/collab/?query=https://research-information.bris.ac.uk/en/persons/jean-golding&method=no")
     assert response.status_code == 200
     assert list(response.json().keys()) == ["query", "method", "res"]
     assert len(response.json()["res"]) > 2
 
 def test_collab2():
-    response = client.get("/collab/?query=ben.elsworth@bristol.ac.uk&method=yes")
+    response = client.get("/collab/?query=https://research-information.bris.ac.uk/en/persons/jean-golding&method=yes")
     assert response.status_code == 200
     assert list(response.json().keys()) == ["query", "method", "res"]
     assert len(response.json()["res"]) > 2
 
 def test_collab3():
-    response = client.get("/collab/?query=ben.elsworth@bristol.ac.uk&method=all")
+    response = client.get("/collab/?query=https://research-information.bris.ac.uk/en/persons/jean-golding&method=all")
     assert response.status_code == 200
     assert list(response.json().keys()) == ["query", "method", "res"]
     assert len(response.json()["res"]) > 2
@@ -70,7 +70,7 @@ def test_vector():
     assert len(response.json()["res"]) == 1
 
 def test_person_aaa():
-    response = client.get("/aaa/?query=ben.elsworth%40bristol.ac.uk&query=tom.gaunt%40bristol.ac.uk&query=josine.min%40bristol.ac.uk&query=andrew.dowsey%40bristol.ac.uk")
+    response = client.get("/aaa/?query=https://research-information.bris.ac.uk/en/persons/jean-golding&query=https://research-information.bris.ac.uk/en/persons/jie-zheng&query=https://research-information.bris.ac.uk/en/persons/gibran-hemani&query=https://research-information.bris.ac.uk/en/persons/rebecca-richmond")
     assert response.status_code == 200
     assert list(response.json().keys()) == ["query", "res"]
     assert len(response.json()["res"]) == 16
