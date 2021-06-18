@@ -189,7 +189,7 @@ def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema
     openapi_schema = get_openapi(
-        title="Bristol data science network API",
+        title="Bristo Medical School (PHS) Researcher Searcher API",
         version="0.1",
         description="",
         routes=app.routes,
