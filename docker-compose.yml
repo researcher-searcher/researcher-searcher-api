@@ -13,3 +13,12 @@ services:
       - TIMEOUT=3000
     volumes:
       - ./:/app
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:${ES_VERSION}
+    user: root
+    container_name: rs-filebeat-$NAME
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:rw
+      - ./logs/elasticsearch.log:/usr/share/logs/elasticsearch.log
+    

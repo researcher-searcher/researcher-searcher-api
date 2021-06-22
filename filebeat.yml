@@ -1,0 +1,29 @@
+# filebeat.yml
+
+filebeat.prospectors:
+- type: log
+  enabled: true
+  fields: {log_type: researcher-searcher}
+  paths:
+    - '/usr/share/logs/elasticsearch.log'
+
+filebeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.enabled: false
+
+setup.template.settings:
+  index.number_of_shards: 3
+
+output.logstash:
+  # The Logstash hosts
+  hosts: ["$ES_HOST:$LOGSTASH_PORT"]
+
+# Write Filebeat own logs only to file to avoid catching them with itself in docker log files
+logging.to_files: true
+logging.to_syslog: false
+
+# X-pack optional module
+xpack.monitoring.enabled: true
+xpack.monitoring.elasticsearch.username: elastic
+xpack.monitoring.elasticsearch.password: $ES_PASSWORD
+
