@@ -5,7 +5,7 @@ filebeat.inputs:
     enabled: true
     fields: {log_type: researcher-searcher}
     paths:
-      - '/usr/share/logs/*.log'
+      - '/usr/share/logs/elasticsearch.log'
 
 output.logstash:
   hosts: ["${LOGSTASH_HOST}"]

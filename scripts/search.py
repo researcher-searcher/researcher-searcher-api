@@ -14,11 +14,6 @@ from scripts.es_functions import (
 from scripts.general import neo4j_connect
 from loguru import logger
 
-logger.add(
-    "logs/debug.log",
-    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", 
-    filter=lambda record: record["extra"]["task"] == "debug"
-    )
 logger = logger.bind(task="debug")
 
 vector_index_name = "use_*_sentence_vectors"

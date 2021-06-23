@@ -25,16 +25,17 @@ app = FastAPI(docs_url="/")
 # globals
 nlp = load_spacy_model()
 
-# logger handler
+# logger handlers
 logger.add(
     "logs/elasticsearch.log",
-    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", 
+    format="{time:YYYY-MM-DD HH:mm:ss} {message}", 
     filter=lambda record: record["extra"]["task"] == "es")
+logger.add(
+    "logs/debug.log",
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {file}:{line} | {message}", 
+    filter=lambda record: record["extra"]["task"] == "debug"
+    )
 es_logger = logger.bind(task="es")
-# @app.get("/")
-# def read_root():
-#    return {"Researcher Searcher"}
-
 
 class SearchMethods(str, Enum):
     c = "combine"
@@ -42,7 +43,6 @@ class SearchMethods(str, Enum):
     v = "vec"
     p = "person"
     o = "output"
-
 
 class CollabFilter(str, Enum):
     y = "yes"

@@ -30,11 +30,6 @@ PERSON_INDEX = 'use_person_vectors'
 OUTPUT_TITLE_INDEX = 'use_title_sentence_vectors'
 OUTPUT_ABSTRACT_INDEX = 'use_abstract_sentence_vectors'
 
-logger.add(
-    "logs/debug.log",
-    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", 
-    filter=lambda record: record["extra"]["task"] == "debug"
-    )
 logger = logger.bind(task="debug")
 
 def vector_query(
