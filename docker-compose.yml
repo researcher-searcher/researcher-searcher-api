@@ -16,9 +16,12 @@ services:
 
   filebeat:
     image: docker.elastic.co/beats/filebeat:${ES_VERSION}
-    user: root
+    command:
+      # not recommended but needed to allow non root file to run
+      # https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html#_disabling_strict_permission_checks
+      - "--strict.perms=false"
     container_name: rs-filebeat-$NAME
     volumes:
       - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:rw
-      - ./logs/elasticsearch.log:/usr/share/logs/elasticsearch.log
+      - ./logs:/usr/share/logs:ro
     
