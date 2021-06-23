@@ -15,12 +15,14 @@ services:
       - ./:/app
 
   filebeat:
-    image: docker.elastic.co/beats/filebeat:${ES_VERSION}
+    image: docker.elastic.co/beats/filebeat:${ELASTIC_VERSION}
     command:
       # not recommended but needed to allow non root file to run
       # https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html#_disabling_strict_permission_checks
       - "--strict.perms=false"
     container_name: rs-filebeat-$NAME
+    environment:
+        LOGSTASH_HOST: "${LOGSTASH_HOST}:${LOGSTASH_PORT}"
     volumes:
       - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:rw
       - ./logs:/usr/share/logs:ro
