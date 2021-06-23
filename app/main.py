@@ -133,6 +133,7 @@ async def run_person(
         le=100
     ),
 ):
+    es_logger.info(json.dumps({"endpoint":"person","method":"NA","query":query}))
     data = get_person(query,limit)
     return {"query": query, "res": data}
 
@@ -158,6 +159,7 @@ async def run_collab(
     ),
     # token: str = Depends(oauth2_scheme)
 ):
+    es_logger.info(json.dumps({"endpoint":"collab","method":method,"query":query}))
     data = get_collab(query, method)
     return {"query": query, "method": method, "res": data}
 
@@ -176,6 +178,7 @@ async def run_vector(
         description="create a vector for each sentence (sent) or for the whole text (all)",
     ),
 ):
+    es_logger.info(json.dumps({"endpoint":"vector","method":method,"query":query}))
     data = get_vec(nlp=nlp,text=query,method=method)
     return {"query": query, "method":method, "res": data}
 
@@ -189,6 +192,7 @@ async def run_person_aaa(
         ..., title="Person list", description="list of people IDs"
     )
 ):
+    es_logger.info(json.dumps({"endpoint":"aaa","method":"NA","query":query}))
     data = get_person_aaa(query=query)
     return {"query": query, "res": data}
 
