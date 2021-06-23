@@ -241,10 +241,10 @@ def combine_full_and_vector(index_name:str, query_text:str, query_vector:list, r
                             },
                             "script":{
                                 # +1 to deal with negative results (script score function must not produce negative scores)
-                                "source": "30 * cosineSimilarity(params.query_vector, 'sent_vector') +5",
+                                "source": "cosineSimilarity(params.query_vector, 'sent_vector') +1",
                                 "params": {"query_vector": query_vector},
                             },
-                            #"boost" : 100
+                            "boost" : 10
                         },
                     },        
                 ],
