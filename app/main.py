@@ -1,3 +1,4 @@
+import json  
 from typing import Optional
 from fastapi import Depends, FastAPI, Query
 from fastapi.openapi.utils import get_openapi
@@ -25,8 +26,11 @@ app = FastAPI(docs_url="/")
 nlp = load_spacy_model()
 
 # logger handler
-logger.add("logs/elasticsearch.log")
-
+logger.add(
+    "logs/elasticsearch.log",
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}", 
+    filter=lambda record: record["extra"]["task"] == "es")
+es_logger = logger.bind(task="es")
 # @app.get("/")
 # def read_root():
 #    return {"Researcher Searcher"}
@@ -89,7 +93,7 @@ async def run_search(
     ),
     # token: str = Depends(oauth2_scheme)
 ):
-    logger.info(f'"method":"{method}"')
+    es_logger.info(json.dumps({"endpoint":"search","method":method,"query":query}))
     # standard match against query sentences
     if method == "combine":
         res = es_vec_sent(nlp=nlp, text=query, year_range=[year_min, year_max])
