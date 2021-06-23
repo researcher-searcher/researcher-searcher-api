@@ -11,10 +11,10 @@ from scripts.general import create_aaa_distances
 env = Env()
 env.read_env()
 
-ES_HOST = env.str("ES_HOST")
-ES_PORT = env.str("ES_PORT")
-ES_USER = env.str("ES_USER")
-ES_PASSWORD = env.str("ES_PASSWORD")
+ES_HOST = env.str("ELASTIC_HOST")
+ES_PORT = env.str("ELASTIC_PORT")
+ES_USER = env.str("ELASTIC_USER")
+ES_PASSWORD = env.str("ELASTIC_PASSWORD")
 
 TIMEOUT = 300
 chunkSize = 10000

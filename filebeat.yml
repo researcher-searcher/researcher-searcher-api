@@ -7,14 +7,8 @@ filebeat.inputs:
     paths:
       - '/usr/share/logs/*.log'
 
-setup.template.settings:
-  index.number_of_shards: 3
-
 output.logstash:
   hosts: ["${LOGSTASH_HOST}"]
 
-# Write Filebeat own logs only to file to avoid catching them with itself in docker log files
-#logging.to_files: true
-#logging.to_syslog: false
 
 

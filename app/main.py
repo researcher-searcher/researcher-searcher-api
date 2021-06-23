@@ -24,6 +24,9 @@ app = FastAPI(docs_url="/")
 # globals
 nlp = load_spacy_model()
 
+# logger handler
+logger.add("logs/elasticsearch.log")
+
 # @app.get("/")
 # def read_root():
 #    return {"Researcher Searcher"}
@@ -86,6 +89,7 @@ async def run_search(
     ),
     # token: str = Depends(oauth2_scheme)
 ):
+    logger.info(f'"method":"{method}"')
     # standard match against query sentences
     if method == "combine":
         res = es_vec_sent(nlp=nlp, text=query, year_range=[year_min, year_max])
