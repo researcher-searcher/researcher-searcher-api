@@ -14,6 +14,8 @@ from scripts.es_functions import (
 from scripts.general import neo4j_connect
 from loguru import logger
 
+logger = logger.bind(task="debug")
+
 vector_index_name = "use_*_sentence_vectors"
 person_index_name = "use_person_vectors"
 output_index_name = "use_output_vectors"

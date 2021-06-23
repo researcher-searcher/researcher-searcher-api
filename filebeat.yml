@@ -1,0 +1,14 @@
+# filebeat.yml
+
+filebeat.inputs:
+  - type: log
+    enabled: true
+    fields: {log_type: researcher-searcher}
+    paths:
+      - '/usr/share/logs/elasticsearch.log'
+
+output.logstash:
+  hosts: ["${LOGSTASH_HOST}"]
+
+
+

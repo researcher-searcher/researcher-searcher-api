@@ -14,6 +14,7 @@ GRAPH_BOLT_PORT = env.str("GRAPH_BOLT_PORT")
 GRAPH_USER = env.str("GRAPH_USER")
 GRAPH_PASSWORD = env.str("GRAPH_PASSWORD")
 
+logger = logger.bind(task="debug")
 
 def load_spacy_model():
     model_name = "en_core_web_trf"

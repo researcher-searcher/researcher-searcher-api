@@ -1,3 +1,4 @@
+import json  
 from typing import Optional
 from fastapi import Depends, FastAPI, Query
 from fastapi.openapi.utils import get_openapi
@@ -24,10 +25,17 @@ app = FastAPI(docs_url="/")
 # globals
 nlp = load_spacy_model()
 
-# @app.get("/")
-# def read_root():
-#    return {"Researcher Searcher"}
-
+# logger handlers
+logger.add(
+    "logs/elasticsearch.log",
+    format="{time:YYYY-MM-DD HH:mm:ss} {message}", 
+    filter=lambda record: record["extra"]["task"] == "es")
+logger.add(
+    "logs/debug.log",
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {file}:{line} | {message}", 
+    filter=lambda record: record["extra"]["task"] == "debug"
+    )
+es_logger = logger.bind(task="es")
 
 class SearchMethods(str, Enum):
     c = "combine"
@@ -35,7 +43,6 @@ class SearchMethods(str, Enum):
     v = "vec"
     p = "person"
     o = "output"
-
 
 class CollabFilter(str, Enum):
     y = "yes"
@@ -86,6 +93,7 @@ async def run_search(
     ),
     # token: str = Depends(oauth2_scheme)
 ):
+    es_logger.info(json.dumps({"endpoint":"search","method":method,"query":query}))
     # standard match against query sentences
     if method == "combine":
         res = es_vec_sent(nlp=nlp, text=query, year_range=[year_min, year_max])
@@ -125,6 +133,7 @@ async def run_person(
         le=100
     ),
 ):
+    es_logger.info(json.dumps({"endpoint":"person","method":"NA","query":query}))
     data = get_person(query,limit)
     return {"query": query, "res": data}
 
@@ -150,6 +159,7 @@ async def run_collab(
     ),
     # token: str = Depends(oauth2_scheme)
 ):
+    es_logger.info(json.dumps({"endpoint":"collab","method":method,"query":query}))
     data = get_collab(query, method)
     return {"query": query, "method": method, "res": data}
 
@@ -168,6 +178,7 @@ async def run_vector(
         description="create a vector for each sentence (sent) or for the whole text (all)",
     ),
 ):
+    es_logger.info(json.dumps({"endpoint":"vector","method":method,"query":query}))
     data = get_vec(nlp=nlp,text=query,method=method)
     return {"query": query, "method":method, "res": data}
 
@@ -181,6 +192,7 @@ async def run_person_aaa(
         ..., title="Person list", description="list of people IDs"
     )
 ):
+    es_logger.info(json.dumps({"endpoint":"aaa","method":"NA","query":query}))
     data = get_person_aaa(query=query)
     return {"query": query, "res": data}
 

@@ -11,10 +11,10 @@ from scripts.general import create_aaa_distances
 env = Env()
 env.read_env()
 
-ES_HOST = env.str("ES_HOST")
-ES_PORT = env.str("ES_PORT")
-ES_USER = env.str("ES_USER")
-ES_PASSWORD = env.str("ES_PASSWORD")
+ES_HOST = env.str("ELASTIC_HOST")
+ES_PORT = env.str("ELASTIC_PORT")
+ES_USER = env.str("ELASTIC_USER")
+ES_PASSWORD = env.str("ELASTIC_PASSWORD")
 
 TIMEOUT = 300
 chunkSize = 10000
@@ -30,6 +30,7 @@ PERSON_INDEX = 'use_person_vectors'
 OUTPUT_TITLE_INDEX = 'use_title_sentence_vectors'
 OUTPUT_ABSTRACT_INDEX = 'use_abstract_sentence_vectors'
 
+logger = logger.bind(task="debug")
 
 def vector_query(
     index_name:str, query_vector:list, record_size:int=100000, search_size:int=ES_HIT_LIMIT, score_min:int=0, year_range:list=[1950,2021]
