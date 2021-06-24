@@ -1,9 +1,12 @@
 import json  
 from typing import Optional
-from fastapi import Depends, FastAPI, Query
+from fastapi import Depends, FastAPI, Query, Request
+from starlette.routing import Match
+
 from fastapi.openapi.utils import get_openapi
 #from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
+from app.logging import es_logger, debug_logger
 from scripts.general import load_spacy_model, neo4j_connect
 from scripts.search import (
     es_sent,
@@ -24,18 +27,6 @@ app = FastAPI(docs_url="/")
 
 # globals
 nlp = load_spacy_model()
-
-# logger handlers
-logger.add(
-    "logs/elasticsearch.log",
-    format="{time:YYYY-MM-DD HH:mm:ss} {message}", 
-    filter=lambda record: record["extra"]["task"] == "es")
-logger.add(
-    "logs/debug.log",
-    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {file}:{line} | {message}", 
-    filter=lambda record: record["extra"]["task"] == "debug"
-    )
-es_logger = logger.bind(task="es")
 
 class SearchMethods(str, Enum):
     c = "combine"

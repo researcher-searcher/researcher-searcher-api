@@ -23,7 +23,8 @@ def load_spacy_model():
     #logger.info(f"Loading spacy model {model_name}")
     #nlp = spacy.load(model_name)
     logger.info("Loading spacy model en_use_lg")
-    nlp = spacy_universal_sentence_encoder.load_model('en_use_lg')
+    #nlp = spacy_universal_sentence_encoder.load_model('en_use_lg')
+    nlp=''
     # nlp = spacy.load("en_core_sci_scibert")
     # nlp = spacy.load("en_core_sci_lg")
     # nlp = spacy.load("en_ner_bionlp13cg_md")
