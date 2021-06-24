@@ -5,8 +5,8 @@ from starlette.routing import Match
 
 from fastapi.openapi.utils import get_openapi
 #from fastapi.security import OAuth2PasswordBearer
-from loguru import logger
-from app.logging import es_logger, debug_logger
+#from loguru import logger
+from app.logging import es_logger, debug_logger, MonitoringMiddleware, extract_request
 from scripts.general import load_spacy_model, neo4j_connect
 from scripts.search import (
     es_sent,
@@ -23,6 +23,7 @@ from scripts.search import (
 from enum import Enum
 
 app = FastAPI(docs_url="/")
+app.add_middleware(MonitoringMiddleware)
 #oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # globals
