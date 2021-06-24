@@ -1,10 +1,10 @@
 from loguru import logger
 from starlette.middleware.base import BaseHTTPMiddleware
-#from starlette.routing import Match
+from starlette.routing import Match
 from fastapi import Depends, FastAPI, Query, Request
 from anonymizeip import anonymize_ip
 import json
-#app = FastAPI(docs_url="/")
+#app = FastAPI()
 
 # @app.middleware("http")
 # async def log_middle(request: Request, call_next):
@@ -30,8 +30,8 @@ class MonitoringMiddleware(BaseHTTPMiddleware):
         request_info = extract_request(request)
         monitoring_info = format_monitoring_info(request_info)
         # logging
-        #logger.info(request_info)
-        logger.bind(task='es',monitoring=True).info(monitoring_info)
+        logger.debug(monitoring_info)
+        logger.bind(task="es",monitoring=True).info(monitoring_info)
         # finish
         response = await call_next(request)
         return response
@@ -106,7 +106,7 @@ def format_monitoring_info(info):
         method=info["method"],
         url=info["url"],
         headers=filtered_headers,
-        params=params,
+        params=params["query_params"],
     )
     return message
 
@@ -120,7 +120,7 @@ def filter_headers(headers):
 # logger handlers
 logger.add(
     "logs/elasticsearch.log",
-    #format="{time:YYYY-MM-DD HH:mm:ss} {message}", 
+    format="{time:YYYY-MM-DD HH:mm:ss} {message}", 
     filter=lambda record: record["extra"]["task"] == "es",
     rotation="7 days",
     compression="tar.gz"
@@ -132,5 +132,5 @@ logger.add(
     rotation="7 days",
     compression="tar.gz"
 )
-es_logger = logger.bind(task="es")
-debug_logger = logger.bind(task="debug")
+#es_logger = logger.bind(task="es")
+#debug_logger = logger.bind(task="debug")
