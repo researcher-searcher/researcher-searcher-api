@@ -21,3 +21,5 @@ dependencies:
     - spacy
     - scispacy
     - pytest
+    - spacy-universal-sentence-encoder
+
