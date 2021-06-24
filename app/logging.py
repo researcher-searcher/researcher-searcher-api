@@ -23,7 +23,7 @@ import json
 #     response = await call_next(request)
 #     return response
 
-MONITORING_MESSAGE = "{masked_ip} {client} {special} {method} {url} {headers}"
+MONITORING_MESSAGE = "{masked_ip} {client} {special} {method} {url} {headers} {params}"
 
 class MonitoringMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
@@ -31,7 +31,7 @@ class MonitoringMiddleware(BaseHTTPMiddleware):
         monitoring_info = format_monitoring_info(request_info)
         # logging
         #logger.info(request_info)
-        es_logger.bind(monitoring=True).info(monitoring_info)
+        logger.bind(task='es',monitoring=True).info(monitoring_info)
         # finish
         response = await call_next(request)
         return response
@@ -70,7 +70,6 @@ def special_headers(headers) -> str:
 
 
 def get_masked_ip(headers):
-    es_logger.info(headers.keys())
     if "x-forwarded-for" in headers.keys():
         field = "x-forwarded-for"
     elif "X-Forwarded-For" in headers.keys():
@@ -93,6 +92,7 @@ def get_masked_ip(headers):
 
 def format_monitoring_info(info):
     headers = info["headers"]
+    params = info["params"]
     special = special_headers(headers)
     masked_ip = get_masked_ip(headers)
     filtered_headers = filter_headers(headers)
@@ -106,6 +106,7 @@ def format_monitoring_info(info):
         method=info["method"],
         url=info["url"],
         headers=filtered_headers,
+        params=params,
     )
     return message
 
@@ -119,7 +120,7 @@ def filter_headers(headers):
 # logger handlers
 logger.add(
     "logs/elasticsearch.log",
-    format="{time:YYYY-MM-DD HH:mm:ss} {message}", 
+    #format="{time:YYYY-MM-DD HH:mm:ss} {message}", 
     filter=lambda record: record["extra"]["task"] == "es",
     rotation="7 days",
     compression="tar.gz"
