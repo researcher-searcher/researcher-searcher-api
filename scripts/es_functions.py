@@ -1,7 +1,7 @@
 from elasticsearch import Elasticsearch
 from elasticsearch import helpers
 from collections import deque
-from loguru import logger
+from app.logging import logger
 import numpy as np
 import time
 import pandas as pd
@@ -30,7 +30,7 @@ PERSON_INDEX = 'use_person_vectors'
 OUTPUT_TITLE_INDEX = 'use_title_sentence_vectors'
 OUTPUT_ABSTRACT_INDEX = 'use_abstract_sentence_vectors'
 
-logger = logger.bind(task="debug")
+logger = logger.bind(debug=True)
 
 def vector_query(
     index_name:str, query_vector:list, record_size:int=100000, search_size:int=ES_HIT_LIMIT, score_min:int=0, year_range:list=[1950,2021]

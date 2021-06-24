@@ -4,24 +4,6 @@ from starlette.routing import Match
 from fastapi import Depends, FastAPI, Query, Request
 from anonymizeip import anonymize_ip
 import json
-#app = FastAPI()
-
-# @app.middleware("http")
-# async def log_middle(request: Request, call_next):
-#     logger.debug(f"{request.method} {request.url}")
-#     routes = request.app.router.routes
-#     logger.debug("Params:")
-#     for route in routes:
-#         match, scope = route.matches(request)
-#         if match == Match.FULL:
-#             for name, value in scope["path_params"].items():
-#                 logger.debug(f"\t{name}: {value}")
-#     logger.debug("Headers:")
-#     for name, value in request.headers.items():
-#         logger.debug(f"\t{name}: {value}")
-
-#     response = await call_next(request)
-#     return response
 
 MONITORING_MESSAGE = "{masked_ip} {client} {special} {method} {url} {headers} {params}"
 
@@ -30,8 +12,8 @@ class MonitoringMiddleware(BaseHTTPMiddleware):
         request_info = extract_request(request)
         monitoring_info = format_monitoring_info(request_info)
         # logging
-        logger.debug(monitoring_info)
-        logger.bind(task="es",monitoring=True).info(monitoring_info)
+        #logger.info(monitoring_info)
+        logger.bind(es=True,debug=True).info(monitoring_info)
         # finish
         response = await call_next(request)
         return response
@@ -121,16 +103,19 @@ def filter_headers(headers):
 logger.add(
     "logs/elasticsearch.log",
     format="{time:YYYY-MM-DD HH:mm:ss} {message}", 
-    filter=lambda record: record["extra"]["task"] == "es",
+    filter=lambda record: "es" in record["extra"],
+    enqueue=False,
     rotation="7 days",
-    compression="tar.gz"
+    retention="7 days",
+    compression="tar.gz",
+    #backtrace=False,
+    #catch=False,
+    #serialize=True,
 )
 logger.add(
     "logs/debug.log",
     format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {file}:{line} | {message}", 
-    filter=lambda record: record["extra"]["task"] == "debug",
+    filter=lambda record: "debug" in record["extra"],
     rotation="7 days",
-    compression="tar.gz"
+    compression="tar.gz",
 )
-#es_logger = logger.bind(task="es")
-#debug_logger = logger.bind(task="debug")

@@ -3,7 +3,7 @@ import spacy
 import numpy as np
 from scipy.spatial import distance
 import spacy_universal_sentence_encoder
-from loguru import logger
+from app.logging import logger
 from environs import Env
 
 env = Env()
@@ -14,7 +14,7 @@ GRAPH_BOLT_PORT = env.str("GRAPH_BOLT_PORT")
 GRAPH_USER = env.str("GRAPH_USER")
 GRAPH_PASSWORD = env.str("GRAPH_PASSWORD")
 
-logger = logger.bind(task="debug")
+logger = logger.bind(debug=True)
 
 def load_spacy_model():
     model_name = "en_core_web_trf"

@@ -12,9 +12,9 @@ from scripts.es_functions import (
     aaa_person
 )
 from scripts.general import neo4j_connect
-from loguru import logger
+from app.logging import logger
 
-logger = logger.bind(task="debug")
+logger = logger.bind(debug=True)
 
 vector_index_name = "use_*_sentence_vectors"
 person_index_name = "use_person_vectors"
