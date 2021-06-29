@@ -5,7 +5,7 @@ from fastapi import Depends, FastAPI, Query, Request
 from anonymizeip import anonymize_ip
 import json
 
-MONITORING_MESSAGE = "{masked_ip} {client} {special} {method} {url} {headers} {params}"
+MONITORING_MESSAGE = "|{masked_ip}|{client}|{special}|{method}|{url}|{headers}|{params}"
 
 class MonitoringMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
@@ -86,9 +86,9 @@ def format_monitoring_info(info):
         client=client,
         special=special,
         method=info["method"],
-        url=info["url"],
-        headers=filtered_headers,
-        params=params["query_params"],
+        url=json.dumps(info["url"]),
+        headers=json.dumps(filtered_headers),
+        params=json.dumps(params["query_params"]),
     )
     return message
 
@@ -108,7 +108,7 @@ logger.add(
     rotation="7 days",
     retention="7 days",
     compression="tar.gz",
-    #backtrace=False,
+    backtrace=False,
     #catch=False,
     #serialize=True,
 )

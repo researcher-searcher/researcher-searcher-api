@@ -21,19 +21,10 @@ def load_spacy_model():
     model_name = "en_core_web_lg"
     # Load English tokenizer, tagger, parser and NER
     #logger.info(f"Loading spacy model {model_name}")
-    #nlp = spacy.load(model_name)
     logger.info("Loading spacy model en_use_lg")
-    #nlp = spacy_universal_sentence_encoder.load_model('en_use_lg')
-    nlp=''
-    # nlp = spacy.load("en_core_sci_scibert")
-    # nlp = spacy.load("en_core_sci_lg")
-    # nlp = spacy.load("en_ner_bionlp13cg_md")
-    # nlp.add_pipe("abbreviation_detector")
+    nlp = spacy_universal_sentence_encoder.load_model('en_use_lg')
+    #nlp=''
 
-    # add max length for transformer
-    # if model_name == 'en_core_web_trf':
-    #    nlp.max_length = 512
-    # nlp.max_length=10000
     logger.info("Done...")
     return nlp
 

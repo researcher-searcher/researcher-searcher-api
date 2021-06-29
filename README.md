@@ -6,7 +6,7 @@ API for Researcher Searcher
 
 https://pypi.org/project/fastapi/
 
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --reload-dir app --reload-dir scripts
 
 pip install spacy-universal-sentence-encoder
 
