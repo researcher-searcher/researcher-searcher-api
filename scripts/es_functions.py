@@ -83,9 +83,6 @@ def vector_query(
         for hit in response["hits"]["hits"]:
             # logger.debug(hit)
             # -1 to deal with +1 above
-            # print("id: {}, score: {}".format(hit["_id"], hit["_score"] - 1))
-            # print(hit["_source"])
-            # print()
             # score cutoff
             if hit["_score"] - 1 > score_min:
                 results.append(
@@ -140,9 +137,6 @@ def mean_vector_query(
         for hit in response["hits"]["hits"]:
             # logger.debug(hit)
             # -1 to deal with +1 above
-            # print("id: {}, score: {}".format(hit["_id"], hit["_score"] - 1))
-            # print(hit["_source"])
-            # print()
             # score cutoff
             if hit["_score"] - 1 > score_min:
                 results.append(
