@@ -26,30 +26,33 @@ TITLE_WEIGHT = 1
 ABSTRACT_WEIGHT = 1
 ES_HIT_LIMIT = 100
 
-PERSON_INDEX = 'use_person_vectors'
-OUTPUT_TITLE_INDEX = 'use_title_sentence_vectors'
-OUTPUT_ABSTRACT_INDEX = 'use_abstract_sentence_vectors'
+PERSON_INDEX = "use_person_vectors"
+OUTPUT_TITLE_INDEX = "use_title_sentence_vectors"
+OUTPUT_ABSTRACT_INDEX = "use_abstract_sentence_vectors"
 
 logger = logger.bind(debug=True)
 
+
 def vector_query(
-    index_name:str, query_vector:list, record_size:int=100000, search_size:int=ES_HIT_LIMIT, score_min:int=0, year_range:list=[1950,2021]
+    index_name: str,
+    query_vector: list,
+    record_size: int = 100000,
+    search_size: int = ES_HIT_LIMIT,
+    score_min: int = 0,
+    year_range: list = [1950, 2021],
 ):
     script_query = {
         "script_score": {
             "query": {
-                "bool" : {
-                "must" : [{
-                    "match_all": {}
-                },
-                {
-                    "range": {
-                        "year": {
-                        "from": year_range[0],
-                        "to": year_range[1]
-                        }
-                    }
-                }]
+                "bool": {
+                    "must": [
+                        {"match_all": {}},
+                        {
+                            "range": {
+                                "year": {"from": year_range[0], "to": year_range[1]}
+                            }
+                        },
+                    ]
                 }
             },
             "script": {
@@ -103,7 +106,11 @@ def vector_query(
 
 
 def mean_vector_query(
-    index_name:str, query_vector:list, record_size:int=100000, search_size:int=ES_HIT_LIMIT, score_min:int=0
+    index_name: str,
+    query_vector: list,
+    record_size: int = 100000,
+    search_size: int = ES_HIT_LIMIT,
+    score_min: int = 0,
 ):
     logger.debug(f"mean_vector_query {index_name}")
     script_query = {
@@ -151,26 +158,15 @@ def mean_vector_query(
         return []
 
 
-def standard_query(index_name:str, text:str, year_range:list=[1950,2021]):
+def standard_query(index_name: str, text: str, year_range: list = [1950, 2021]):
     body = {
         "size": ES_HIT_LIMIT,
         "query": {
-            "bool" : {
-            "must" : [{
-                "match": {
-                    "sent_text": {
-                        "query": text     
-                    }
-                }
-            },
-            {
-                "range": {
-                    "year": {
-                    "from": year_range[0],
-                    "to": year_range[1]
-                    }
-                }
-            }]
+            "bool": {
+                "must": [
+                    {"match": {"sent_text": {"query": text}}},
+                    {"range": {"year": {"from": year_range[0], "to": year_range[1]}}},
+                ]
             }
         },
         "_source": ["doc_id", "sent_num", "sent_text", "year"],
@@ -186,7 +182,7 @@ def standard_query(index_name:str, text:str, year_range:list=[1950,2021]):
     return res
 
 
-def filter_query(index_name:str, filterData:str):
+def filter_query(index_name: str, filterData: str):
     body = {
         # "from":from_val,
         "size": ES_HIT_LIMIT,
@@ -198,8 +194,16 @@ def filter_query(index_name:str, filterData:str):
     )
     return res
 
+
 # https://discuss.elastic.co/t/use-distance-on-dense-vectors-in-relevance-score-at-query-time/217012/2
-def combine_full_and_vector(index_name:str, query_text:str, query_vector:list, record_size:int=100000, search_size:int=100, score_min:int=0, year_range:list=[1950,2021]
+def combine_full_and_vector(
+    index_name: str,
+    query_text: str,
+    query_vector: list,
+    record_size: int = 100000,
+    search_size: int = 100,
+    score_min: int = 0,
+    year_range: list = [1950, 2021],
 ):
     logger.info(query_text)
     body = {
@@ -208,45 +212,43 @@ def combine_full_and_vector(index_name:str, query_text:str, query_vector:list, r
             "bool": {
                 "should": [
                     {
-                    "bool" : {
-                        "must" : [
-                            {
-                            "match": {
-                                "sent_text": {
-                                    "query": query_text,     
-                                    #"boost" : 10
-                                },                            
-                            }
-                        },
-                        {   
-                            "range": {
-                                "year": {
-                                    "from": year_range[0],
-                                    "to": year_range[1]
-                                }
-                            }
-                            }]
+                        "bool": {
+                            "must": [
+                                {
+                                    "match": {
+                                        "sent_text": {
+                                            "query": query_text,
+                                            # "boost" : 10
+                                        },
+                                    }
+                                },
+                                {
+                                    "range": {
+                                        "year": {
+                                            "from": year_range[0],
+                                            "to": year_range[1],
+                                        }
+                                    }
+                                },
+                            ]
                         }
                     },
                     {
                         "script_score": {
-                            #"query" : {"match_all" : {}},
-                            "query" : {
+                            # "query" : {"match_all" : {}},
+                            "query": {
                                 "range": {
-                                "year": {
-                                    "from": year_range[0],
-                                    "to": year_range[1]
+                                    "year": {"from": year_range[0], "to": year_range[1]}
                                 }
-                            }
                             },
-                            "script":{
+                            "script": {
                                 # +1 to deal with negative results (script score function must not produce negative scores)
                                 "source": "cosineSimilarity(params.query_vector, 'sent_vector') +1",
                                 "params": {"query_vector": query_vector},
                             },
-                            "boost" : 10
+                            "boost": 10,
                         },
-                    },        
+                    },
                 ],
             }
         },
@@ -256,35 +258,32 @@ def combine_full_and_vector(index_name:str, query_text:str, query_vector:list, r
             {OUTPUT_ABSTRACT_INDEX: ABSTRACT_WEIGHT},
         ],
     }
-    #logger.info(body)
+    # logger.info(body)
     res = es.search(
         ignore_unavailable=True, request_timeout=TIMEOUT, index=index_name, body=body
     )
     return res
 
-def aaa_person(person_list:list):
+
+def aaa_person(person_list: list):
     logger.info(person_list)
 
     # get vectors for each person
     body = {
         "size": ES_HIT_LIMIT,
-        "query": {
-            "bool": {
-                "filter": [{"terms":{"doc_id":person_list}}]
-            }
-        },
+        "query": {"bool": {"filter": [{"terms": {"doc_id": person_list}}]}},
         "_source": ["doc_id", "vector"],
     }
     res = es.search(
         ignore_unavailable=True, request_timeout=TIMEOUT, index=PERSON_INDEX, body=body
     )
-    #logger.info(res)
+    # logger.info(res)
 
     # create dictionary of IDs and vectors
     vector_data = {}
-    for r in res['hits']['hits']:
-        person_id = r['_source']['doc_id']
-        person_vector = r['_source']['vector']
+    for r in res["hits"]["hits"]:
+        person_id = r["_source"]["doc_id"]
+        person_vector = r["_source"]["vector"]
         vector_data[person_id] = person_vector
     logger.info(len(vector_data))
 
@@ -293,11 +292,11 @@ def aaa_person(person_list:list):
     logger.info(pws)
 
     # create df of person-person and score
-    aaa_data=[]
-    for i,key1 in enumerate(vector_data):
-        for j,key2 in enumerate(vector_data):
-            #logger.info(f'{key1} {key2} {pws[i][j]}')
-            aaa_data.append({'p1':key1,'p2':key2,'score':1-pws[i][j]})
+    aaa_data = []
+    for i, key1 in enumerate(vector_data):
+        for j, key2 in enumerate(vector_data):
+            # logger.info(f'{key1} {key2} {pws[i][j]}')
+            aaa_data.append({"p1": key1, "p2": key2, "score": 1 - pws[i][j]})
     df = pd.DataFrame(aaa_data)
     logger.info(df)
     return df

@@ -1,4 +1,4 @@
-#import scispacy
+# import scispacy
 import spacy
 import numpy as np
 from scipy.spatial import distance
@@ -16,14 +16,15 @@ GRAPH_PASSWORD = env.str("GRAPH_PASSWORD")
 
 logger = logger.bind(debug=True)
 
+
 def load_spacy_model():
     model_name = "en_core_web_trf"
     model_name = "en_core_web_lg"
     # Load English tokenizer, tagger, parser and NER
-    #logger.info(f"Loading spacy model {model_name}")
+    # logger.info(f"Loading spacy model {model_name}")
     logger.info("Loading spacy model en_use_lg")
-    nlp = spacy_universal_sentence_encoder.load_model('en_use_lg')
-    #nlp=''
+    nlp = spacy_universal_sentence_encoder.load_model("en_use_lg")
+    # nlp=''
 
     logger.info("Done...")
     return nlp
@@ -39,11 +40,12 @@ def neo4j_connect():
     session = driver.session()
     return session
 
+
 def create_aaa_distances(vectors=[]):
-    logger.info(f'Creating distances {len(vectors)}')
+    logger.info(f"Creating distances {len(vectors)}")
     data = np.array(vectors)
-    pws = distance.pdist(data, metric='cosine')
-    #return as square-form distance matrix
+    pws = distance.pdist(data, metric="cosine")
+    # return as square-form distance matrix
     pws = distance.squareform(pws)
     logger.info(len(pws))
     return pws

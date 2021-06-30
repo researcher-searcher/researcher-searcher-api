@@ -9,7 +9,7 @@ from scripts.es_functions import (
     mean_vector_query,
     filter_query,
     combine_full_and_vector,
-    aaa_person
+    aaa_person,
 )
 from scripts.general import neo4j_connect
 from app.logging import logger
@@ -91,13 +91,13 @@ def weighted_average(data, top=5):
     weights = list(data["weight"][:top])
     scores = list(data["score"][:top])
     weighted_avg = np.average(scores, weights=weights)
-    #logger.info(weighted_avg)
+    # logger.info(weighted_avg)
 
     # factor in the number of sentence hits
-    #weighted_avg = weighted_avg * math.sqrt(len(weights))
-    weighted_avg = round(weighted_avg * len(weights)**(1./3.),3)
-    #logger.info(f'{weighted_avg} {len(weights)**(1./3.)}')
-    
+    # weighted_avg = weighted_avg * math.sqrt(len(weights))
+    weighted_avg = round(weighted_avg * len(weights) ** (1.0 / 3.0), 3)
+    # logger.info(f'{weighted_avg} {len(weights)**(1./3.)}')
+
     # weighted_avg = round(np.average( scores),3)
     # logger.info(f'weights {weights} scores {scores} wa {weighted_avg}')
     return weighted_avg
@@ -112,17 +112,17 @@ def convert_df_to_wa(results_df, person_df, doc_col):
     wa = df_group.apply(weighted_average)
     df = df_group.size().reset_index(name="count")
     logger.info(df.head())
-    
-    #create single list for orgs
+
+    # create single list for orgs
     orgs = list(df_group["org"].apply(list))
     unique_orgs = []
     for o in orgs:
         unique_orgs.append(o[0])
-    df['org'] = unique_orgs
-    
+    df["org"] = unique_orgs
+
     # add weighted average
     df["wa"] = list(wa)
-    
+
     # create lists for each group
     df["weights"] = list(df_group["weight"].apply(list))
     df["scores"] = list(df_group["score"].apply(list))
@@ -137,6 +137,7 @@ def convert_df_to_wa(results_df, person_df, doc_col):
     df.sort_values(by="wa", ascending=False, inplace=True)
     return df
 
+
 # standard match against sentence text
 def es_vec_sent(nlp, text: str, year_range: list):
     logger.info(f"Running es_sent with {text}")
@@ -146,10 +147,15 @@ def es_vec_sent(nlp, text: str, year_range: list):
     output_list = []
     for sent in doc.sents:
         # check if sentence is suitable
-        if len(sent.text.strip())<3:
+        if len(sent.text.strip()) < 3:
             continue
         logger.info(f"##### {q_sent_num} {sent.text} ######")
-        res = combine_full_and_vector(index_name=vector_index_name, query_vector=sent.vector, query_text=sent.text, year_range=year_range)
+        res = combine_full_and_vector(
+            index_name=vector_index_name,
+            query_vector=sent.vector,
+            query_text=sent.text,
+            year_range=year_range,
+        )
         # logger.info(res)
         if res:
             weight = len(res["hits"]["hits"])
@@ -173,8 +179,9 @@ def es_vec_sent(nlp, text: str, year_range: list):
         logger.info(f"\n{df.head(n=20)[['person_name','count','wa']]}")
         return df.to_dict("records")
     else:
-        logger.info('no results')
+        logger.info("no results")
         return []
+
 
 # standard match against sentence text
 def es_sent(nlp, text: str, year_range: list):
@@ -185,10 +192,12 @@ def es_sent(nlp, text: str, year_range: list):
     output_list = []
     for sent in doc.sents:
         # check if sentence is suitable
-        if len(sent.text.strip())<3:
+        if len(sent.text.strip()) < 3:
             continue
         logger.info(f"##### {q_sent_num} {sent.text} ######")
-        res = standard_query(index_name=vector_index_name, text=sent.text, year_range=year_range)
+        res = standard_query(
+            index_name=vector_index_name, text=sent.text, year_range=year_range
+        )
         # logger.info(res)
         if res:
             weight = len(res["hits"]["hits"])
@@ -211,8 +220,9 @@ def es_sent(nlp, text: str, year_range: list):
         df = convert_df_to_wa(es_df, op, "doc_id")
         return df.to_dict("records")
     else:
-        logger.info('no results')
+        logger.info("no results")
         return []
+
 
 def es_vec(nlp, text: str, year_range: list):
     doc = nlp(text)
@@ -221,13 +231,15 @@ def es_vec(nlp, text: str, year_range: list):
     output_list = []
     for sent in doc.sents:
         # check if sentence is suitable
-        if len(sent.text.strip())<3:
+        if len(sent.text.strip()) < 3:
             continue
         logger.info(f"##### {q_sent_num} {sent} {len(sent.text.strip())} ######")
         # vectors
         sent_vec = sent.vector
-        res = vector_query(index_name=vector_index_name, query_vector=sent_vec, year_range=year_range)
-        #logger.info(res)
+        res = vector_query(
+            index_name=vector_index_name, query_vector=sent_vec, year_range=year_range
+        )
+        # logger.info(res)
         if res:
             logger.info(res[0])
             weight = len(res)
@@ -249,34 +261,35 @@ def es_vec(nlp, text: str, year_range: list):
     else:
         return []
 
-def get_vec(nlp,text:str,method:str):
+
+def get_vec(nlp, text: str, method: str):
     doc = nlp(text)
     logger.info(f"get_vec {text} {method}")
     results = []
     q_sent_num = 0
 
-    if method == 'sent':
+    if method == "sent":
         for sent in doc.sents:
             # check if sentence is suitable
-            if len(sent.text.strip())<3:
+            if len(sent.text.strip()) < 3:
                 continue
             logger.info(f"##### {q_sent_num} {sent} {len(sent.text.strip())} ######")
             # vectors
             vec = sent.vector
-            results.append({
-                'q_sent_num':q_sent_num,
-                'q_sent_text':sent.text,
-                'vector':vec.tolist()
-            })
+            results.append(
+                {
+                    "q_sent_num": q_sent_num,
+                    "q_sent_text": sent.text,
+                    "vector": vec.tolist(),
+                }
+            )
             q_sent_num += 1
     else:
         vec = doc.vector
-        results.append({
-                'q_sent_num':q_sent_num,
-                'q_sent_text':text,
-                'vector':vec.tolist()
-            })
-    #logger.info(results)
+        results.append(
+            {"q_sent_num": q_sent_num, "q_sent_text": text, "vector": vec.tolist()}
+        )
+    # logger.info(results)
     return results
 
 
@@ -374,7 +387,7 @@ def get_person_info(text: str, method: str = "fuzzy"):
 def get_collab(person: str, method: str):
     logger.info(f"get_collab {person} {method}")
     person = person.strip().lower()
-    limit=100
+    limit = 100
     if method == "no":
         query = """
             MATCH 
@@ -400,7 +413,7 @@ def get_collab(person: str, method: str):
             LIMIT
                 {limit}
         """.format(
-            person=person,limit=limit
+            person=person, limit=limit
         )
     elif method == "yes":
         query = """
@@ -427,7 +440,7 @@ def get_collab(person: str, method: str):
             LIMIT
                 {limit}
         """.format(
-            person=person,limit=limit
+            person=person, limit=limit
         )
     else:
         query = """
@@ -444,12 +457,12 @@ def get_collab(person: str, method: str):
             LIMIT
                 {limit}
         """.format(
-            person=person,limit=limit
+            person=person, limit=limit
         )
     logger.info(query)
     data = session.run(query).data()
     df = pd.json_normalize(data).to_dict("records")
-    #logger.info(f"\n{df}")
+    # logger.info(f"\n{df}")
     return df
 
 
@@ -464,8 +477,7 @@ def get_person(person: str, limit: int):
         return 
             n.text as text,r.score as score order by r.score desc limit {limit};
     """.format(
-        person=person,
-        limit=limit
+        person=person, limit=limit
     )
     logger.info(query)
     data = session.run(query).data()
@@ -474,8 +486,8 @@ def get_person(person: str, limit: int):
     else:
         return []
 
-def get_person_aaa(query:list):
+
+def get_person_aaa(query: list):
     res = aaa_person(person_list=query)
     logger.info(res)
     return res.to_dict("records")
-

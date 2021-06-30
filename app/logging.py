@@ -7,16 +7,18 @@ import json
 
 MONITORING_MESSAGE = "|{masked_ip}|{client}|{special}|{method}|{url}|{headers}|{params}"
 
+
 class MonitoringMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         request_info = extract_request(request)
         monitoring_info = format_monitoring_info(request_info)
         # logging
-        #logger.info(monitoring_info)
-        logger.bind(es=True,debug=True).info(monitoring_info)
+        # logger.info(monitoring_info)
+        logger.bind(es=True, debug=True).info(monitoring_info)
         # finish
         response = await call_next(request)
         return response
+
 
 def extract_request(request: Request):
     # Process headers and remove cookie field
@@ -37,6 +39,7 @@ def extract_request(request: Request):
         "headers": headers,
     }
     return info
+
 
 def special_headers(headers) -> str:
     """Mark incoming request for whether it is for special usage:
@@ -72,6 +75,7 @@ def get_masked_ip(headers):
         return None
     return masked_ip
 
+
 def format_monitoring_info(info):
     headers = info["headers"]
     params = info["params"]
@@ -92,6 +96,7 @@ def format_monitoring_info(info):
     )
     return message
 
+
 def filter_headers(headers):
     filtered_headers = headers
     filtered_headers.pop("cookie", None)
@@ -99,22 +104,23 @@ def filter_headers(headers):
     filtered_headers.pop("X-Forwarded-For", None)
     return filtered_headers
 
+
 # logger handlers
 logger.add(
     "logs/elasticsearch.log",
-    format="{time:YYYY-MM-DD HH:mm:ss} {message}", 
+    format="{time:YYYY-MM-DD HH:mm:ss} {message}",
     filter=lambda record: "es" in record["extra"],
     enqueue=False,
     rotation="7 days",
     retention="7 days",
     compression="tar.gz",
     backtrace=False,
-    #catch=False,
-    #serialize=True,
+    # catch=False,
+    # serialize=True,
 )
 logger.add(
     "logs/debug.log",
-    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {file}:{line} | {message}", 
+    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {file}:{line} | {message}",
     filter=lambda record: "debug" in record["extra"],
     rotation="7 days",
     compression="tar.gz",
