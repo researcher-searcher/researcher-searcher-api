@@ -16,3 +16,5 @@ fastapi==0.63.0
 #pydantic==0.18.2
 pytest
 uvicorn==0.13.4
+anonymizeip
+spacy_universal_sentence_encoder

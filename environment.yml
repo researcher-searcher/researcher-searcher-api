@@ -22,4 +22,5 @@ dependencies:
     - scispacy
     - pytest
     - spacy-universal-sentence-encoder
+    - anonymizeip
 

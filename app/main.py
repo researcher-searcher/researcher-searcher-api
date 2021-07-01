@@ -1,9 +1,9 @@
-import json  
+import json
 from typing import Optional
-from fastapi import Depends, FastAPI, Query
+from fastapi import Depends, FastAPI, Query, Request
+
 from fastapi.openapi.utils import get_openapi
-#from fastapi.security import OAuth2PasswordBearer
-from loguru import logger
+from app.logging import MonitoringMiddleware, logger
 from scripts.general import load_spacy_model, neo4j_connect
 from scripts.search import (
     es_sent,
@@ -15,27 +15,18 @@ from scripts.search import (
     get_person,
     get_vec,
     es_vec_sent,
-    get_person_aaa
+    get_person_aaa,
 )
 from enum import Enum
 
+es_logger = logger.bind(es=True)
+
 app = FastAPI(docs_url="/")
-#oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+app.add_middleware(MonitoringMiddleware)
 
 # globals
 nlp = load_spacy_model()
 
-# logger handlers
-logger.add(
-    "logs/elasticsearch.log",
-    format="{time:YYYY-MM-DD HH:mm:ss} {message}", 
-    filter=lambda record: record["extra"]["task"] == "es")
-logger.add(
-    "logs/debug.log",
-    format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {file}:{line} | {message}", 
-    filter=lambda record: record["extra"]["task"] == "debug"
-    )
-es_logger = logger.bind(task="es")
 
 class SearchMethods(str, Enum):
     c = "combine"
@@ -44,10 +35,12 @@ class SearchMethods(str, Enum):
     p = "person"
     o = "output"
 
+
 class CollabFilter(str, Enum):
     y = "yes"
     n = "no"
     a = "all"
+
 
 class SplitMethod(str, Enum):
     sent = "sent"
@@ -80,31 +73,41 @@ async def run_search(
         description="the method to use for the search query (full, vec, person or output)",
     ),
     year_min: int = Query(
-        2000,
-        title="Minimum year",
-        description="minimum year of output",
-        ge=1950
+        2000, title="Minimum year", description="minimum year of output", ge=1950
     ),
     year_max: int = Query(
-        2021,
-        title="Maximum year",
-        description="maximum year of output",
-        le=2021
+        2021, title="Maximum year", description="maximum year of output", le=2021
     ),
     # token: str = Depends(oauth2_scheme)
 ):
-    es_logger.info(json.dumps({"endpoint":"search","method":method,"query":query}))
+    # es_logger.info(json.dumps({"endpoint":"search","method":method,"query":query}))
+    es_logger.bind()
     # standard match against query sentences
     if method == "combine":
         res = es_vec_sent(nlp=nlp, text=query, year_range=[year_min, year_max])
-        return {"query": query, "method": method, 'year_range':[year_min,year_max], "res": res}
+        return {
+            "query": query,
+            "method": method,
+            "year_range": [year_min, year_max],
+            "res": res,
+        }
     if method == "full":
         res = es_sent(nlp=nlp, text=query, year_range=[year_min, year_max])
-        return {"query": query, "method": method, 'year_range':[year_min,year_max], "res": res}
+        return {
+            "query": query,
+            "method": method,
+            "year_range": [year_min, year_max],
+            "res": res,
+        }
     # sentence vector match against query sentences
     elif method == "vec":
         res = es_vec(nlp=nlp, text=query, year_range=[year_min, year_max])
-        return {"query": query, "method": method, 'year_range':[year_min,year_max], "res": res}
+        return {
+            "query": query,
+            "method": method,
+            "year_range": [year_min, year_max],
+            "res": res,
+        }
     # people vector match against query
     elif method == "person":
         res = es_person_vec(nlp=nlp, text=query)
@@ -123,18 +126,16 @@ async def run_search(
     tags=["search"],
 )
 async def run_person(
-    query: str = Query(
-        ..., title="Person Query", description="the id of the person"
-    ),
+    query: str = Query(..., title="Person Query", description="the id of the person"),
     limit: int = Query(
         10,
         title="Number of results to return",
         description="number of results to return",
-        le=100
+        le=100,
     ),
 ):
-    es_logger.info(json.dumps({"endpoint":"person","method":"NA","query":query}))
-    data = get_person(query,limit)
+    es_logger.bind()
+    data = get_person(query, limit)
     return {"query": query, "res": data}
 
 
@@ -148,9 +149,7 @@ async def run_person(
 )
 async def run_collab(
     query: str = Query(
-        ...,
-        title="Collaboration recommender",
-        description="the id of the person",
+        ..., title="Collaboration recommender", description="the id of the person",
     ),
     method: CollabFilter = Query(
         CollabFilter.y,
@@ -159,9 +158,10 @@ async def run_collab(
     ),
     # token: str = Depends(oauth2_scheme)
 ):
-    es_logger.info(json.dumps({"endpoint":"collab","method":method,"query":query}))
+    es_logger.bind()
     data = get_collab(query, method)
     return {"query": query, "method": method, "res": data}
+
 
 @app.get(
     "/vector/",
@@ -178,9 +178,10 @@ async def run_vector(
         description="create a vector for each sentence (sent) or for the whole text (all)",
     ),
 ):
-    es_logger.info(json.dumps({"endpoint":"vector","method":method,"query":query}))
-    data = get_vec(nlp=nlp,text=query,method=method)
-    return {"query": query, "method":method, "res": data}
+    es_logger.bind()
+    data = get_vec(nlp=nlp, text=query, method=method)
+    return {"query": query, "method": method, "res": data}
+
 
 @app.get(
     "/aaa/",
@@ -188,13 +189,12 @@ async def run_vector(
     tags=["search"],
 )
 async def run_person_aaa(
-    query: list = Query(
-        ..., title="Person list", description="list of people IDs"
-    )
+    query: list = Query(..., title="Person list", description="list of people IDs")
 ):
-    es_logger.info(json.dumps({"endpoint":"aaa","method":"NA","query":query}))
+    es_logger.bind()
     data = get_person_aaa(query=query)
     return {"query": query, "res": data}
+
 
 # customise the swagger interface
 def custom_openapi():
