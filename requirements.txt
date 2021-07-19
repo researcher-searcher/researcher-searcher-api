@@ -12,7 +12,7 @@ setuptools
 wheel
 spacy
 #scispacy
-fastapi==0.63.0
+fastapi==0.65.2
 #pydantic==0.18.2
 pytest
 uvicorn==0.13.4
