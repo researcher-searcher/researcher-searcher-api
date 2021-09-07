@@ -31,8 +31,6 @@ def person_info(id_list: list, node_property: str):
             (o:Org)-[r:PERSON_ORG]-(p:Person)
         WHERE
             p.{property} in {id_list}
-        AND
-            o.type in ['academicschool','academicdepartment'] 
         RETURN 
             p.name as name, p.url as url, p.person_id as person_id, collect(o.name) as org;
     """.format(
@@ -393,8 +391,6 @@ def get_collab(person: str, method: str):
                 (p1:Person)-[pp:PERSON_PERSON]-(p2:Person)-[r:PERSON_ORG]-(org:Org) 
             WHERE 
                 p1._id = '{person}'
-            AND
-                org.type in ['academicschool','academicdepartment'] 
             WITH
                 p1,pp,p2,org
             ORDER 
@@ -419,9 +415,7 @@ def get_collab(person: str, method: str):
             MATCH 
                 (p1:Person)-[pp:PERSON_PERSON]-(p2:Person)-[r:PERSON_ORG]-(org:Org)  
             WHERE 
-                p1._id = '{person}'
-            AND
-                org.type in ['academicschool','academicdepartment'] 
+                p1._id = '{person}' 
             WITH
                 p1,pp,p2,org
             ORDER 
@@ -446,8 +440,6 @@ def get_collab(person: str, method: str):
             MATCH 
                 (p1:Person)-[pp:PERSON_PERSON]-(p2:Person)-[r:PERSON_ORG]-(org:Org)
             WHERE
-                org.type in ['academicschool','academicdepartment'] 
-            AND 
                 p1._id = '{person}'
             RETURN
                 p2.name as name, p2.person_id as person_id, p2.url as url, collect(org.name) as org, pp.score as score 

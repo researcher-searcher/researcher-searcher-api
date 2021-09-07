@@ -42,6 +42,10 @@ Create container
 
 `docker-compose up -d`
 
+### test
+
+`pytest`
+
 ### todo
 
 Response model - https://fastapi.tiangolo.com/tutorial/response-model/
