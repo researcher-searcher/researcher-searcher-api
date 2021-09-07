@@ -15,8 +15,9 @@ dependencies:
   - altair
   - plotly=4.14.3
   - fastapi
-  - uvicorn
+  - uvicorn  
   - pip:
+    - certifi==2021.5.30        
     - simple-parsing
     - spacy
     - scispacy

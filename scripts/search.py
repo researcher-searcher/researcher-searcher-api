@@ -70,8 +70,6 @@ def output_to_people(output_list: list):
             (org:Org)-[r:PERSON_ORG]-(p:Person)-[:PERSON_OUTPUT]-(o:Output) 
         WHERE
             o.id in {output_list} 
-        AND
-            org.type in ['academicschool','academicdepartment'] 
         RETURN 
             p.name as person_name, p.person_id as person_id, o.id as output_id, collect(org.name) as org;
     """.format(
@@ -105,6 +103,7 @@ def weighted_average(data, top=5):
 
 def convert_df_to_wa(results_df, person_df, doc_col):
     logger.info(results_df.shape)
+    #logger.info(person_df)
     m = results_df.merge(person_df, left_on=doc_col, right_on="output_id")
     m.drop([doc_col], axis=1, inplace=True)
     # m['weight']=range(m.shape[0],0,-1)
