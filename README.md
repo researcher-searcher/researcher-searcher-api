@@ -6,9 +6,20 @@ API for Researcher Searcher
 
 https://pypi.org/project/fastapi/
 
-uvicorn app.main:app --reload --reload-dir app --reload-dir scripts
+Set up env
 
+```
+conda env create -f environment.yml
+conda activate researcher-searcher-api
 pip install spacy-universal-sentence-encoder
+```
+
+Start api
+
+```
+uvicorn app.main:app --reload --reload-dir app --reload-dir scripts
+```
+
 
 ### build
 
