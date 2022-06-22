@@ -11,16 +11,23 @@ from scripts.general import create_aaa_distances
 env = Env()
 env.read_env()
 
-ES_HOST = env.str("ELASTIC_HOST")
-ES_PORT = env.str("ELASTIC_PORT")
-ES_USER = env.str("ELASTIC_USER")
-ES_PASSWORD = env.str("ELASTIC_PASSWORD")
+ES_HOST = env.str("ELASTIC_HOST").strip()
+ES_PORT = env.str("ELASTIC_PORT").strip()
+ES_USER = env.str("ELASTIC_USER").strip()
+ES_PASSWORD = env.str("ELASTIC_PASSWORD").strip()
+
 
 TIMEOUT = 300
 chunkSize = 10000
-es = Elasticsearch(
-    [f"{ES_HOST}:{ES_PORT}"], http_auth=(ES_USER, ES_PASSWORD), timeout=TIMEOUT
-)
+try:
+    es = Elasticsearch(
+        [f"{ES_HOST}:{ES_PORT}"], http_auth=(ES_USER, ES_PASSWORD), timeout=TIMEOUT
+    )
+except Exception as e:
+    logger.error(f"Problem with ES connection {ES_HOST}:{ES_PORT} {ES_USER} {ES_PASSWORD}")
+    logger.error(e)
+    exit(1)
+    
 
 TITLE_WEIGHT = 1
 ABSTRACT_WEIGHT = 1
