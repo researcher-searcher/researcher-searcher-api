@@ -16,6 +16,7 @@ from scripts.search import (
     get_vec,
     es_vec_sent,
     get_person_aaa,
+    get_person_info,
 )
 from enum import Enum
 
@@ -193,6 +194,18 @@ async def run_person_aaa(
 ):
     es_logger.bind()
     data = get_person_aaa(query=query)
+    return {"query": query, "res": data}
+
+@app.get(
+    "/lookup",
+    description=("Lookup a person by name"),
+    tags=["search"],
+)
+async def run_lookup(
+    query: list = Query(..., title="Name text", description="text for name search")
+):
+    es_logger.bind()
+    data = get_person_info(query=query)
     return {"query": query, "res": data}
 
 

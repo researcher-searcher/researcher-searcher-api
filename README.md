@@ -20,6 +20,8 @@ Start api
 uvicorn app.main:app --reload --reload-dir app --reload-dir scripts
 ```
 
+- doesn't seem to work
+- neither does venv and requirements.txt
 
 ### build
 
