@@ -358,7 +358,7 @@ def get_person_info(text: str, method: str = "fuzzy"):
             WHERE
                 toLower(p.name) contains toLower('{text}') 
             RETURN 
-                p.name as person_name,p.url as person_id;
+                p.name as person_name,p.url as person_id, p._id as pid;
         """.format(
             text=text
         )
@@ -369,7 +369,7 @@ def get_person_info(text: str, method: str = "fuzzy"):
             WHERE
                 p.name = '{text}' 
             RETURN 
-                p.name as person_name,p.url as person_id;
+                p.name as person_name,p.url as person_id, p._id as pid;
         """.format(
             text=text
         )

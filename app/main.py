@@ -202,10 +202,10 @@ async def run_person_aaa(
     tags=["search"],
 )
 async def run_lookup(
-    query: list = Query(..., title="Name text", description="text for name search")
+    query: str = Query(..., title="Name text", description="text for name search")
 ):
     es_logger.bind()
-    data = get_person_info(query=query)
+    data = get_person_info(text=query)
     return {"query": query, "res": data}
 
 
